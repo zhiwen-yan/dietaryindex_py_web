@@ -1,0 +1,9 @@
+﻿DI-GM food category,Approximate number of FNDDS codes,Identification criteria and representative FNDDS code examples
+Avocado and avocado-containing foods,~15,"Foods containing avocado were identified using exact ingredient-based matching. Examples: 63101000 (avocado, raw) and 63101110 (guacamole)."
+Fermented dairy products,~45,"This category included fermented dairy products such as yogurt and kefir. Examples: 11411400 (yogurt, plain) and 11460000 (kefir)."
+Low-fat dairy products,~60,"Fat-content criteria were applied to identify skim or 1%-fat milk and low-fat cheese products. Examples: 11112110 (milk, 1%) and 14104010 (cheese, low fat)."
+Legumes,~80,"This category covered beans, lentils, and legume-based products. Examples: 27111000 (beans, black, cooked) and 27116100 (lentils)."
+Cruciferous vegetables,~35,"Foods such as broccoli, cauliflower, and cabbage were extracted. Examples: 72104100 (broccoli, raw) and 72107100 (cabbage)."
+Whole fruits,~90,"All fruit juices were excluded, and only intact whole fruits were retained. Examples: 61101010 (apple, raw) and 63107010 (banana)."
+Whole grains,~120,"Foods were screened according to ingredient information, including whole-wheat flour, oats, and brown rice. Examples: 20000200 (oatmeal) and 20000600 (brown rice)."
+Red and processed meat,~200,"This category included beef, pork, lamb, sausage products, bacon, and other processed meat products. Examples: 21100000 (beef, ground) and 22610000 (bacon)."

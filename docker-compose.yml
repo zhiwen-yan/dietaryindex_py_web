@@ -1,0 +1,12 @@
+services:
+  dietaryindex-web:
+    build:
+      context: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8501:8501"
+    volumes:
+      - ./dietaryindex:/app/dietaryindex
+      - ./streamlit_app:/app/streamlit_app
+      - ./tests:/app/tests
+      - ../NHANES:/app/NHANES

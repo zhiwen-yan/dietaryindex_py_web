@@ -1,0 +1,1121 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   膳食指数计算平台 — 营养学主题样式系统
+   Dietary Index Calculation Platform — Nutrition Theme (Enhanced v2)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Fonts & General Overrides ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+body, .stMarkdown, p, label, input, select, textarea {
+    font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #dcd9d4;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #c1beb9;
+}
+
+/* ── CSS Variables ─────────────────────────────────────────────────────── */
+:root {
+    --green-deep: #1a6b56;
+    --green-primary: #2d8c6e;
+    --green-light: #4dab8a;
+    --green-bg: #eaf5f0;
+    --gold: #c7952b;
+    --gold-light: #f5e6c8;
+    --berry: #7c5cbf;
+    --tomato: #d4584a;
+    --page-bg: #fefcf8;
+    --card-bg: #ffffff;
+    --text-primary: #2d2d2d;
+    --text-secondary: #5a5a5a;
+    --text-muted: #8a8a8a;
+    --border: #e8e5df;
+    --border-light: #f0ede7;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+}
+
+/* ── Global ────────────────────────────────────────────────────────────── */
+.block-container {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+    max-width: 1200px;
+}
+
+.stApp {
+    background: radial-gradient(circle at 10% 20%, rgba(254, 252, 248, 1) 0%, rgba(247, 251, 248, 1) 90%) !important;
+}
+
+body {
+    color: var(--text-primary);
+}
+
+h1 {
+    color: var(--green-deep) !important;
+    font-weight: 800 !important;
+    font-size: 2.1rem !important;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+}
+
+h2 {
+    color: var(--green-primary) !important;
+    font-weight: 700 !important;
+    font-size: 1.45rem !important;
+    border-bottom: 2px solid var(--green-bg);
+    padding-bottom: 0.4rem;
+    margin-top: 1.8rem;
+    letter-spacing: -0.02em;
+}
+
+h3 {
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+    font-size: 1.15rem !important;
+    letter-spacing: -0.01em;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+.stButton > button {
+    border-radius: var(--radius-sm) !important;
+    font-weight: 600 !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: none !important;
+}
+
+.stButton > button[kind="primary"] {
+    background: linear-gradient(135deg, var(--green-primary), var(--green-deep)) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(45,140,110,0.2) !important;
+}
+
+.stButton > button[kind="primary"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(45,140,110,0.35) !important;
+}
+
+.stButton > button:not([kind="primary"]) {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-primary) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.stButton > button:not([kind="primary"]):hover {
+    border-color: var(--green-light) !important;
+    color: var(--green-primary) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04) !important;
+}
+
+.stDownloadButton > button {
+    border-radius: var(--radius-sm) !important;
+    font-weight: 500 !important;
+    background: linear-gradient(135deg, var(--green-light), var(--green-primary)) !important;
+    color: white !important;
+    border: none !important;
+    transition: all 0.25s ease !important;
+}
+
+.stDownloadButton > button:hover {
+    background: linear-gradient(135deg, var(--green-primary), var(--green-deep)) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(45,140,110,0.2) !important;
+}
+
+/* ── Cards & Expanders ─────────────────────────────────────────────────── */
+div[data-testid="stExpander"] {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-sm);
+    background-color: var(--card-bg) !important;
+    transition: all 0.25s ease !important;
+}
+
+div[data-testid="stExpander"]:hover {
+    border-color: var(--green-light) !important;
+    box-shadow: 0 4px 12px rgba(45,140,110,0.06);
+}
+
+div[data-testid="stAlert"] {
+    border-radius: var(--radius-md) !important;
+    border: none !important;
+    box-shadow: var(--shadow-sm);
+}
+
+/* ── Dataframe ─────────────────────────────────────────────────────────── */
+.stDataFrame, .stTable {
+    border-radius: var(--radius-md) !important;
+    overflow: hidden;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-sm);
+}
+
+.stDataFrame [data-testid="stTable"] {
+    font-size: 0.88rem;
+}
+
+/* ── Select boxes ──────────────────────────────────────────────────────── */
+.stSelectbox label {
+    font-size: 0.82rem !important;
+    color: var(--text-secondary) !important;
+    font-weight: 600;
+}
+
+div[data-baseweb="select"] > div {
+    border-radius: var(--radius-sm) !important;
+    border-color: var(--border) !important;
+    transition: border-color 0.2s;
+}
+
+div[data-baseweb="select"] > div:hover {
+    border-color: var(--green-primary) !important;
+}
+
+/* ── Hero Banner ───────────────────────────────────────────────────────── */
+.hero-banner {
+    background: linear-gradient(135deg, #1a6b56 0%, #2d8c6e 40%, #3da88a 70%, #c7952b 100%);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 3rem;
+    margin-bottom: 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(26,107,86,0.15);
+}
+
+.hero-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 60%;
+    height: 200%;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.hero-banner h1 {
+    color: white !important;
+    font-size: 2.3rem !important;
+    margin-bottom: 0.3rem;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.hero-banner .hero-subtitle {
+    font-size: 1.05rem;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0.8rem;
+    font-weight: 500;
+}
+
+.hero-banner .hero-tagline {
+    font-size: 0.9rem;
+    opacity: 0.75;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Index Cards Grid ──────────────────────────────────────────────────── */
+.index-card-wrapper {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.index-card-wrapper:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md), 0 8px 24px rgba(45,140,110,0.12);
+    border-color: var(--green-primary);
+}
+
+.index-card {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 1.5rem 1.2rem 0.5rem 1.2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.index-card .card-icon {
+    font-size: 2.2rem;
+    margin-bottom: 0.8rem;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 56px;
+    height: 56px;
+    background-color: var(--green-bg);
+    border-radius: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    transition: transform 0.3s ease;
+}
+
+.index-card-wrapper:hover .card-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.index-card .card-name {
+    font-weight: 700;
+    color: var(--green-deep);
+    font-size: 1.15rem;
+    margin-bottom: 0.15rem;
+    flex-shrink: 0;
+}
+
+.index-card .card-eng {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.4rem;
+    flex-shrink: 0;
+}
+
+.index-card .card-score {
+    display: inline-block;
+    background: var(--green-bg);
+    color: var(--green-deep);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.8rem;
+    border-radius: 20px;
+    border: 1px solid rgba(45,140,110,0.15);
+    flex-shrink: 0;
+}
+
+.index-card .card-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    line-height: 1.45;
+    flex: 1 1 auto;
+    /* 固定最小高度，确保所有卡片描述区域等高，按钮底部对齐 */
+    min-height: 4.5em;
+}
+
+/* Featured index cards — button always bottom-aligned */
+.index-card.featured {
+    padding: 1.6rem 1.2rem 0.5rem 1.2rem;
+}
+
+/* Card button wrapper: push button to bottom */
+.card-button-wrapper {
+    margin-top: auto;
+}
+
+/* ── CSS Grid Layouts (替代 st.columns，一次渲染全部卡片) ────────────── */
+.idx-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    align-items: stretch;
+}
+.idx-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    align-items: stretch;
+}
+@media (max-width: 900px) {
+    .idx-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .idx-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+    .idx-grid-4, .idx-grid-3 { grid-template-columns: 1fr; }
+}
+
+/* ── Index Nav Button (替代 st.page_link，配合网格布局) ───────────────── */
+.idx-btn {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    text-align: center;
+    text-decoration: none !important;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--green-primary);
+    background: var(--green-bg);
+    border: none;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    transition: color 0.15s, background 0.15s;
+}
+.idx-btn:hover {
+    color: #fff;
+    background: var(--green-primary);
+    text-decoration: none !important;
+}
+
+/*
+ * Streamlit column alignment fix:
+ * Streamlit wraps each st.markdown / st.page_link in its own container div,
+ * breaking the parent-child flex chain. These rules target Streamlit's internal
+ * column structure to force equal-height cards with bottom-aligned buttons.
+ */
+
+/* Make Streamlit column containers stretch to equal height */
+[data-testid="stHorizontalBlock"] {
+    align-items: stretch !important;
+}
+
+/* Each column should fill height and use flex column layout */
+[data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Streamlit's inner column container: stretch children */
+[data-testid="stColumn"] > [data-testid="stVerticalBlockBorderWrapper"],
+[data-testid="stColumn"] > div {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* The vertical block inside each column */
+[data-testid="stColumn"] [data-testid="stVerticalBlock"] {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* The last Streamlit element in the column (the page link button) pushes to bottom */
+[data-testid="stColumn"] [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:last-child {
+    margin-top: auto !important;
+}
+
+/* Horizontal card variant (for all-12 grid) */
+.index-card-h {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 1.2rem 1.2rem 0.5rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex-grow: 1;
+}
+
+.index-card-h .card-h-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.index-card-h .card-h-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background-color: var(--green-bg);
+    border-radius: 50%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+    transition: transform 0.3s ease;
+}
+
+.index-card-wrapper:hover .card-h-icon {
+    transform: scale(1.1);
+}
+
+.index-card-h .card-h-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.index-card-h .card-h-name {
+    font-weight: 700;
+    color: var(--green-deep);
+    font-size: 0.95rem;
+    line-height: 1.2;
+}
+
+.index-card-h .card-h-meta {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    line-height: 1.2;
+}
+
+.index-card-h .card-h-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    flex: 1 0 auto;
+    min-height: 2.2rem;
+    margin-bottom: 0.2rem;
+}
+
+/* Global Page Link Button Styling (Applies to main page index cards) */
+[data-testid="stPageLink"] {
+    width: 100% !important;
+    margin-top: 0.6rem !important;
+    padding: 0 1.2rem 1.2rem 1.2rem !important;
+    box-sizing: border-box !important;
+}
+
+[data-testid="stPageLink"] a {
+    background: linear-gradient(135deg, var(--green-primary), var(--green-deep)) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1rem !important;
+    color: white !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 2px 8px rgba(45,140,110,0.18) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+[data-testid="stPageLink"] a p,
+[data-testid="stPageLink"] a span,
+[data-testid="stPageLink"] a div {
+    color: white !important;
+}
+
+[data-testid="stPageLink"] a:hover {
+    background: linear-gradient(135deg, var(--green-light), var(--green-primary)) !important;
+    box-shadow: 0 4px 16px rgba(45,140,110,0.35) !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+}
+
+[data-testid="stPageLink"] a:hover p,
+[data-testid="stPageLink"] a:hover span,
+[data-testid="stPageLink"] a:hover div {
+    color: white !important;
+}
+
+/* Center Streamlit inner page link flex content */
+[data-testid="stPageLink"] a > div {
+    justify-content: center !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+}
+
+/* ── Step Flow ─────────────────────────────────────────────────────────── */
+.step-flow {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0.8rem 1.4rem;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s;
+}
+
+.step-item:hover {
+    transform: translateY(-2px);
+}
+
+.step-number {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--green-primary), var(--green-deep));
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.step-text {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.step-arrow {
+    color: var(--green-light);
+    font-size: 1.2rem;
+    font-weight: 700;
+    align-self: center;
+}
+
+/* ── Mode Selection Cards ──────────────────────────────────────────────── */
+.mode-cards {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin: 0.8rem 0 1.5rem 0;
+}
+
+.mode-card {
+    flex: 1;
+    min-width: 140px;
+    max-width: 200px;
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1rem 0.8rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mode-card:hover {
+    border-color: var(--green-light);
+}
+
+.mode-card.selected {
+    border-color: var(--green-primary);
+    background: var(--green-bg);
+}
+
+.mode-card .mode-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.3rem;
+}
+
+.mode-card .mode-name {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.mode-card .mode-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+}
+
+.mode-card .mode-check {
+    display: none;
+    color: var(--green-primary);
+    font-weight: 700;
+    margin-top: 0.3rem;
+    font-size: 0.8rem;
+}
+
+.mode-card.selected .mode-check {
+    display: block;
+}
+
+/* ── Upload Zone & File Uploader ───────────────────────────────────────── */
+div[data-testid="stFileUploader"] {
+    border: 2px dashed var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 1.5rem !important;
+    background: rgba(254, 252, 248, 0.45) !important;
+    transition: all 0.3s ease !important;
+}
+
+div[data-testid="stFileUploader"]:hover {
+    border-color: var(--green-light) !important;
+    background: var(--green-bg) !important;
+}
+
+div[data-testid="stFileUploader"] section {
+    background: transparent !important;
+    border: none !important;
+}
+
+.upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.8rem;
+    text-align: center;
+    background: linear-gradient(180deg, var(--page-bg), var(--card-bg));
+    transition: all 0.3s ease;
+}
+
+.upload-zone:hover {
+    border-color: var(--green-light);
+    background: var(--green-bg);
+}
+
+.upload-zone .upload-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.6;
+}
+
+.upload-zone .upload-text {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+}
+
+.upload-zone .upload-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* ── Score Report ──────────────────────────────────────────────────────── */
+.score-report {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-top: 1.5rem;
+    box-shadow: var(--shadow-md);
+}
+
+.score-report .report-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--green-deep);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid var(--green-bg);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: -0.02em;
+}
+
+.score-gauge {
+    background: linear-gradient(180deg, var(--green-bg), var(--card-bg));
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.score-gauge .gauge-label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.score-gauge .gauge-value {
+    font-size: 3.2rem;
+    font-weight: 800;
+    color: var(--green-deep);
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.score-gauge .gauge-sub {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.4rem;
+}
+
+/* ── Stat Cards ────────────────────────────────────────────────────────── */
+.stat-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+}
+
+.stat-card {
+    flex: 1;
+    min-width: 100px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.8rem 1rem;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    border-color: var(--green-light);
+    transform: translateY(-1px);
+}
+
+.stat-card .stat-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+}
+
+.stat-card .stat-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+/* ── Section Card ──────────────────────────────────────────────────────── */
+.section-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.section-card .section-title {
+    font-weight: 700;
+    color: var(--green-deep);
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* ── Export Panel ──────────────────────────────────────────────────────── */
+.export-panel {
+    background: var(--page-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.5rem;
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow-sm);
+}
+
+.export-panel .export-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* ── Sidebar (Glassmorphic Override) ────────────────────────────────────── */
+section[data-testid="stSidebar"] {
+    background: rgba(254, 252, 248, 0.75) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(232, 229, 223, 0.5) !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stSidebarNav"] {
+    display: none !important;
+}
+
+section[data-testid="stSidebar"] .stMarkdown h2 {
+    color: var(--green-deep) !important;
+    border-bottom: none;
+    font-size: 1.1rem !important;
+    padding: 0.6rem 0 0.3rem 0;
+    letter-spacing: -0.01em;
+}
+
+section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+    gap: 0.8rem;
+}
+
+section[data-testid="stSidebar"] hr {
+    margin: 0.5rem 0;
+    border-color: rgba(232, 229, 223, 0.5) !important;
+}
+
+/* Sidebar Page Link Styling Overrides */
+section[data-testid="stSidebar"] [data-testid="stPageLink"] {
+    padding: 0 !important;
+    margin: 0.05rem 0 !important;
+    width: 100% !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stPageLink"] a {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.32rem 0.6rem !important;
+    color: var(--text-primary) !important;
+    box-shadow: none !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    width: 100% !important;
+    transform: none !important;
+    transition: all 0.2s ease !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stPageLink"] a p,
+section[data-testid="stSidebar"] [data-testid="stPageLink"] a span,
+section[data-testid="stSidebar"] [data-testid="stPageLink"] a div {
+    color: var(--text-primary) !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stPageLink"] a:hover {
+    background: var(--green-bg) !important;
+    color: var(--green-deep) !important;
+    transform: translateX(2px) !important;
+    box-shadow: none !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stPageLink"] a:hover p,
+section[data-testid="stSidebar"] [data-testid="stPageLink"] a:hover span,
+section[data-testid="stSidebar"] [data-testid="stPageLink"] a:hover div {
+    color: var(--green-deep) !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stPageLink"] a > div {
+    justify-content: flex-start !important;
+    width: auto !important;
+}
+
+/* sidebar brand area */
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0 0.1rem 0;
+    margin-bottom: 0.15rem;
+}
+
+.sidebar-brand .brand-icon {
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.sidebar-brand .brand-text {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #1a6b56;
+    line-height: 1;
+    letter-spacing: -0.03em;
+}
+
+.sidebar-subtitle {
+    font-size: 0.72rem;
+    color: #8a8a8a;
+    margin-bottom: 0.8rem;
+    padding-left: 0.1rem;
+}
+
+/* sidebar category label */
+.sidebar-cat-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #1a6b56;
+    background: #eaf5f0;
+    padding: 0.25rem 0.5rem;
+    margin-top: 0.8rem !important;
+    margin-bottom: 0.4rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    border-radius: 4px;
+    display: block;
+    width: fit-content;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.sidebar-version {
+    font-size: 0.68rem;
+    color: #aaa;
+    margin-top: 0.5rem;
+    padding-top: 0.3rem;
+}
+
+/* ── Step Indicator ────────────────────────────────────────────────────── */
+.step-indicator {
+    display: flex;
+    gap: 0;
+    margin: 1.5rem 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.step-indicator .step {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--page-bg);
+    border-right: 1px solid var(--border);
+    transition: all 0.3s ease;
+}
+
+.step-indicator .step:last-child {
+    border-right: none;
+}
+
+.step-indicator .step.active {
+    background: var(--green-primary);
+    color: white;
+}
+
+.step-indicator .step.done {
+    background: var(--green-bg);
+    color: var(--green-deep);
+}
+
+/* ── Info Box ──────────────────────────────────────────────────────────── */
+.info-box {
+    background: var(--green-bg);
+    border-left: 4px solid var(--green-primary);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.info-box .info-title {
+    font-weight: 700;
+    color: var(--green-deep);
+    margin-bottom: 0.3rem;
+}
+
+.info-box p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* ── File Tag ──────────────────────────────────────────────────────────── */
+.file-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: var(--green-bg);
+    color: var(--green-deep);
+    padding: 0.25rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(45,140,110,0.15);
+}
+
+/* ── Tabs Style Override ───────────────────────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 0.5rem;
+}
+
+.stTabs [data-baseweb="tab"] {
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0 !important;
+    padding: 0.6rem 1.2rem !important;
+    font-weight: 600 !important;
+    color: var(--text-secondary) !important;
+    transition: all 0.2s ease !important;
+}
+
+.stTabs [aria-selected="true"] {
+    color: var(--green-primary) !important;
+    border-bottom-color: var(--green-primary) !important;
+    background: rgba(45,140,110,0.04) !important;
+}
+
+/* ── Footer ────────────────────────────────────────────────────────────── */
+.app-footer {
+    text-align: center;
+    padding: 2rem 0 0.5rem 0;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border-light);
+    margin-top: 2rem;
+}
+
+/* ── Progress / Metric Override ────────────────────────────────────────── */
+[data-testid="stMetric"] {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 1.2rem !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all 0.25s ease !important;
+}
+
+[data-testid="stMetric"]:hover {
+    border-color: var(--green-light) !important;
+    box-shadow: 0 4px 12px rgba(45,140,110,0.06) !important;
+    transform: translateY(-2px);
+}
+
+[data-testid="stMetric"] label {
+    color: var(--text-muted) !important;
+    font-size: 0.78rem !important;
+    font-weight: 600;
+}
+
+[data-testid="stMetric"] [data-testid="stMetricValue"] {
+    color: var(--green-deep) !important;
+    font-size: 2.1rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.03em;
+}
+
+/* ── Radio button enhancement ──────────────────────────────────────────── */
+div[role="radiogroup"] label {
+    padding: 0.5rem 0.8rem !important;
+    border-radius: var(--radius-sm) !important;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+div[role="radiogroup"] label:hover {
+    background: var(--green-bg);
+}
+
+/* ── Tooltips / Help text ──────────────────────────────────────────────── */
+.stCaption {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+footer {
+    visibility: hidden;
+}

@@ -1,0 +1,9 @@
+﻿Data source / mode,DII,HEI15,HEI20,AHEI,AHEIP,DASH,DASHI,MED,MEDI,ACS20,PHDI,DI-GM
+Generic CSV/Excel,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+NHANES FPED tot,Yes,Yes,Yes,-,-,-,Yes,Yes,-,-,-,-
+NHANES FPED iff,Yes,-,-,Yes,-,Yes,-,-,Yes,-,-,Yes
+NHANES MPED tot,Yes,Yes,Yes,-,-,-,Yes,Yes,-,-,-,-
+NHANES MPED iff,Yes,-,-,Yes,-,Yes,-,-,Yes,-,-,Yes
+ASA24,Yes,Yes*,Yes*,Yes*,-,Yes*,-,Yes*,-,-,-,-
+DHQ3,Yes,Yes*,-,Yes,Yes*,Yes*,-,Yes*,-,-,-,-
+BLOCK FFQ,Yes,Yes*,-,Yes,Yes,Yes*,-,Yes*,-,-,-,-

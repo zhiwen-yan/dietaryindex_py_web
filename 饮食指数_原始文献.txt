@@ -1,0 +1,323 @@
+======================================================================
+                饮食指数（Dietary Index）原始文献 / 开山之作
+        基于 dietaryindex R包 (v2.1) 中各饮食指数函数整理
+======================================================================
+
+说明：
+  - 对于每个饮食指数，列出构建该指数的那一篇"开山之作"（首创/奠基性论文）。
+  - 如该指数有多版本更新，也一并列出对应的更新论文。
+  - 引用信息来源于 dietaryindex 包 vignette 中的参考文献链接及PubMed检索。
+
+
+----------------------------------------------------------------------
+1. HEI (Healthy Eating Index) — 健康饮食指数
+----------------------------------------------------------------------
+
+  【开山之作】HEI-1995（首个HEI）
+  Kennedy ET, Ohls J, Carlson S, Fleming K.
+  "The Healthy Eating Index: design and applications."
+  J Am Diet Assoc. 1995;95(10):1103-1108.
+  doi: 10.1016/S0002-8223(95)00300-2
+
+  【HEI-2015 更新版】（本包HEI2015函数实现）
+  Krebs-Smith SM, Pannucci TE, Subar AF, et al.
+  "Update of the Healthy Eating Index: HEI-2015."
+  J Acad Nutr Diet. 2018;118(9):1591-1602.
+  doi: 10.1016/j.jand.2018.05.021
+
+  【HEI-2020 更新版】（本包HEI2020函数实现）
+  Shams-White MM, Pannucci TE, Lerman JL, et al.
+  "Healthy Eating Index-2020: Review and Update Process to Reflect
+   the Dietary Guidelines for Americans, 2020-2025."
+  J Acad Nutr Diet. 2023;123(9):1280-1288.
+  doi: 10.1016/j.jand.2023.05.015
+
+
+----------------------------------------------------------------------
+2. AHEI (Alternative Healthy Eating Index) — 替代健康饮食指数
+----------------------------------------------------------------------
+
+  【开山之作】AHEI-2002
+  McCullough ML, Feskanich D, Stampfer MJ, et al.
+  "Diet quality and major chronic disease risk in men and women:
+   moving toward improved dietary guidance."
+  Am J Clin Nutr. 2002;76(6):1261-1271.
+  doi: 10.1093/ajcn/76.6.1261
+
+  【AHEI-2010 更新版】（本包AHEI函数实现）
+  Chiuve SE, Fung TT, Rimm EB, et al.
+  "Alternative dietary indices both strongly predict risk of
+   chronic disease."
+  J Nutr. 2012;142(6):1009-1018.
+  doi: 10.3945/jn.111.157222
+
+
+----------------------------------------------------------------------
+3. AHEIP (Alternative Healthy Eating Index for Pregnancy)
+    — 孕期替代健康饮食指数
+----------------------------------------------------------------------
+
+  【开山之作】
+  Rifas-Shiman SL, Rich-Edwards JW, Kleinman KP, Oken E, Gillman MW.
+  "Dietary quality during pregnancy varies by maternal characteristics
+   in Project Viva: a US cohort."
+  J Am Diet Assoc. 2009;109(6):1004-1011.
+  doi: 10.1016/j.jada.2009.03.001
+
+
+----------------------------------------------------------------------
+4. DASH (Dietary Approaches to Stop Hypertension)
+    — 终止高血压膳食疗法（指数）
+----------------------------------------------------------------------
+
+  【开山之作】DASH 临床试验
+  Appel LJ, Moore TJ, Obarzanek E, et al.
+  "A clinical trial of the effects of dietary patterns on blood
+   pressure."
+  N Engl J Med. 1997;336(16):1117-1124.
+  doi: 10.1056/NEJM199704173361601
+
+  【DASH 饮食评分】（本包DASH函数实现）
+  Fung TT, Chiuve SE, McCullough ML, et al.
+  "Adherence to a DASH-style diet and risk of coronary heart
+   disease and stroke in women."
+  Arch Intern Med. 2008;168(7):713-720.
+  doi: 10.1001/archinte.168.7.713
+
+
+----------------------------------------------------------------------
+5. DASHI (DASH Index — 基于营养素)
+----------------------------------------------------------------------
+
+  【开山之作】DASHI 评分方法
+  Mellen PB, Gao SK, Vitolins MZ, Goff DC Jr.
+  "Deteriorating dietary habits among adults with hypertension:
+   DASH dietary accordance, NHANES 1988-1994 and 1999-2004."
+  Arch Intern Med. 2008;168(3):308-314.
+  doi: 10.1001/archinternmed.2007.119
+
+  注：DASHI基于 Appel et al. 1997 (NEJM) DASH试验的营养素目标，
+       由 Mellen et al. 2008 将其标准化为可评分指标。
+
+
+----------------------------------------------------------------------
+6. MED / aMED (Alternate Mediterranean Diet Score)
+    — 替代地中海饮食评分
+----------------------------------------------------------------------
+
+  【开山之作】地中海饮食评分（MDS）
+  Trichopoulou A, Kouris-Blazos A, Wahlqvist ML, et al.
+  "Diet and overall survival in elderly people."
+  BMJ. 1995;311(7018):1457-1460.
+  doi: 10.1136/bmj.311.7018.1457
+
+  【aMED 美国版】（本包MED函数实现）
+  Fung TT, Rexrode KM, Mantzoros CS, et al.
+  "Mediterranean diet and incidence of and mortality from coronary
+   heart disease and stroke in women."
+  Circulation. 2009;119(8):1093-1100.
+  doi: 10.1161/CIRCULATIONAHA.108.816736
+
+
+----------------------------------------------------------------------
+7. MEDI (Mediterranean Diet Index — 基于份数/PREDIMED)
+----------------------------------------------------------------------
+
+  【开山之作】14项地中海饮食依从性筛查工具（MEDAS）
+  Schröder H, Fitó M, Estruch R, et al.
+  "A short screener is valid for assessing Mediterranean diet
+   adherence among older Spanish men and women."
+  J Nutr. 2011;141(6):1140-1145.
+  doi: 10.3945/jn.110.135566
+
+  【PREDIMED 试验验证】
+  Estruch R, Ros E, Salas-Salvadó J, et al.
+  "Primary prevention of cardiovascular disease with a
+   Mediterranean diet supplemented with extra-virgin olive oil
+   or nuts."
+  N Engl J Med. 2018;378(25):e34.
+  doi: 10.1056/NEJMoa1800389
+
+
+----------------------------------------------------------------------
+8. DII (Dietary Inflammatory Index) — 膳食炎症指数
+----------------------------------------------------------------------
+
+  【开山之作】
+  Shivappa N, Steck SE, Hurley TG, Hussey JR, Hébert JR.
+  "Designing and developing a literature-derived, population-based
+   dietary inflammatory index."
+  Public Health Nutr. 2014;17(8):1689-1696.
+  doi: 10.1017/S1368980013002115
+
+
+----------------------------------------------------------------------
+9. DI-GM (Dietary Index for Gut Microbiota) — 肠道菌群膳食指数
+----------------------------------------------------------------------
+
+  【开山之作】
+  Kase BE, Liese AD, Zhang J, Murphy EA, Zhao L, Steck SE.
+  "The Development and Evaluation of a Literature-Based Dietary
+   Index for Gut Microbiota."
+  Nutrients. 2024;16(7):1045.
+  doi: 10.3390/nu16071045
+
+
+----------------------------------------------------------------------
+10. PHDI (Planetary Health Diet Index) — 行星健康饮食指数
+----------------------------------------------------------------------
+
+  【开山之作】EAT-Lancet 委员会报告
+  Willett W, Rockström J, Loken B, et al.
+  "Food in the Anthropocene: the EAT-Lancet Commission on healthy
+   diets from sustainable food systems."
+  Lancet. 2019;393(10170):447-492.
+  doi: 10.1016/S0140-6736(18)31788-4
+
+  【PHDI 评分操作化】（本包PHDI函数实现）
+  Cacau LT, De Carli E, de Carvalho AM, et al.
+  "Development and Validation of an Index Based on EAT-Lancet
+   Recommendations: The Planetary Health Diet Index."
+  Nutrients. 2021;13(5):1698.
+  doi: 10.3390/nu13051698
+
+
+----------------------------------------------------------------------
+11. ACS2020 (American Cancer Society 2020 Diet Score)
+     — 美国癌症学会2020饮食评分
+----------------------------------------------------------------------
+
+  【ACS 2020 指南】
+  Rock CL, Thomson C, Gansler T, et al.
+  "American Cancer Society guideline for diet and physical
+   activity for cancer prevention."
+  CA Cancer J Clin. 2020;70(4):245-271.
+  doi: 10.3322/caac.21591
+
+  【ACS2020 评分开发】（本包ACS2020_V1/V2函数实现）
+  McCullough ML, Chantaprasopsuk S, Islami F, et al.
+  "Association of Socioeconomic and Geographic Factors With
+   Diet Quality in US Adults."
+  JAMA Netw Open. 2022;5(5):e2211618.
+  doi: 10.1001/jamanetworkopen.2022.11618
+
+
+======================================================================
+                          总 览 表
+======================================================================
+
+  R包函数          饮食指数                   开山之作 (第一作者, 年份, 期刊)
+  ----------------------------------------------------------------------------
+  HEI2015          Healthy Eating Index       Kennedy ET, 1995, J Am Diet Assoc
+                   2015
+  HEI2020          Healthy Eating Index       Kennedy ET, 1995, J Am Diet Assoc
+                   2020
+  AHEI             Alternative Healthy        McCullough ML, 2002, Am J Clin Nutr
+                   Eating Index
+  AHEIP            AHEI for Pregnancy         Rifas-Shiman SL, 2009, J Am Diet
+                                              Assoc
+  DASH             DASH diet score            Appel LJ, 1997, N Engl J Med
+                   (Fung score)
+  DASHI            DASH nutrient-based        Appel LJ, 1997, N Engl J Med
+                   (Mellen score)             (trial); Mellen PB, 2008, Arch
+                                              Intern Med (scoring)
+  MED / aMED       Alternate Med Diet         Trichopoulou A, 1995, BMJ
+                                              (original); Fung TT, 2009,
+                                              Circulation (aMED)
+  MEDI             Med Diet / PREDIMED        Schröder H, 2011, J Nutr
+                                              (MEDAS); Estruch R, 2018, NEJM
+  DII              Dietary Inflammatory       Shivappa N, 2014, Public Health
+                   Index                      Nutr
+  DI-GM            Dietary Index for Gut      Kase BE, 2024, Nutrients
+                   Microbiota
+  PHDI             Planetary Health Diet      Willett W, 2019, Lancet (EAT-
+                   Index                      Lancet); Cacau LT, 2021,
+                                              Nutrients (scoring)
+  ACS2020_V1/V2    ACS 2020 Diet Score        Rock CL, 2020, CA Cancer J Clin
+                                              (guideline); McCullough ML,
+                                              2022, JAMA Netw Open (scoring)
+  ----------------------------------------------------------------------------
+
+======================================================================
+                        参 考 文 献 (按第一作者字母排序)
+======================================================================
+
+1.  Appel LJ, Moore TJ, Obarzanek E, et al. A clinical trial of the
+    effects of dietary patterns on blood pressure. N Engl J Med.
+    1997;336(16):1117-1124.
+
+2.  Cacau LT, De Carli E, de Carvalho AM, et al. Development and
+    Validation of an Index Based on EAT-Lancet Recommendations: The
+    Planetary Health Diet Index. Nutrients. 2021;13(5):1698.
+
+3.  Chiuve SE, Fung TT, Rimm EB, et al. Alternative dietary indices both
+    strongly predict risk of chronic disease. J Nutr. 2012;142(6):1009-1018.
+
+4.  Estruch R, Ros E, Salas-Salvadó J, et al. Primary prevention of
+    cardiovascular disease with a Mediterranean diet supplemented with
+    extra-virgin olive oil or nuts. N Engl J Med. 2018;378(25):e34.
+
+5.  Fung TT, Chiuve SE, McCullough ML, et al. Adherence to a DASH-style
+    diet and risk of coronary heart disease and stroke in women.
+    Arch Intern Med. 2008;168(7):713-720.
+
+6.  Fung TT, Rexrode KM, Mantzoros CS, et al. Mediterranean diet and
+    incidence of and mortality from coronary heart disease and stroke in
+    women. Circulation. 2009;119(8):1093-1100.
+
+7.  Kase BE, Liese AD, Zhang J, Murphy EA, Zhao L, Steck SE. The
+    Development and Evaluation of a Literature-Based Dietary Index for
+    Gut Microbiota. Nutrients. 2024;16(7):1045.
+
+8.  Kennedy ET, Ohls J, Carlson S, Fleming K. The Healthy Eating Index:
+    design and applications. J Am Diet Assoc. 1995;95(10):1103-1108.
+
+9.  Krebs-Smith SM, Pannucci TE, Subar AF, et al. Update of the Healthy
+    Eating Index: HEI-2015. J Acad Nutr Diet. 2018;118(9):1591-1602.
+
+10. McCullough ML, Feskanich D, Stampfer MJ, et al. Diet quality and
+    major chronic disease risk in men and women: moving toward improved
+    dietary guidance. Am J Clin Nutr. 2002;76(6):1261-1271.
+
+11. McCullough ML, Chantaprasopsuk S, Islami F, et al. Association of
+    Socioeconomic and Geographic Factors With Diet Quality in US Adults.
+    JAMA Netw Open. 2022;5(5):e2211618.
+
+12. Mellen PB, Gao SK, Vitolins MZ, Goff DC Jr. Deteriorating dietary
+    habits among adults with hypertension: DASH dietary accordance,
+    NHANES 1988-1994 and 1999-2004. Arch Intern Med. 2008;168(3):308-314.
+
+13. Rifas-Shiman SL, Rich-Edwards JW, Kleinman KP, Oken E, Gillman MW.
+    Dietary quality during pregnancy varies by maternal characteristics
+    in Project Viva: a US cohort. J Am Diet Assoc. 2009;109(6):1004-1011.
+
+14. Rock CL, Thomson C, Gansler T, et al. American Cancer Society
+    guideline for diet and physical activity for cancer prevention.
+    CA Cancer J Clin. 2020;70(4):245-271.
+
+15. Schröder H, Fitó M, Estruch R, et al. A short screener is valid for
+    assessing Mediterranean diet adherence among older Spanish men and
+    women. J Nutr. 2011;141(6):1140-1145.
+
+16. Shams-White MM, Pannucci TE, Lerman JL, et al. Healthy Eating
+    Index-2020: Review and Update Process to Reflect the Dietary
+    Guidelines for Americans, 2020-2025. J Acad Nutr Diet.
+    2023;123(9):1280-1288.
+
+17. Shivappa N, Steck SE, Hurley TG, Hussey JR, Hébert JR. Designing and
+    developing a literature-derived, population-based dietary inflammatory
+    index. Public Health Nutr. 2014;17(8):1689-1696.
+
+18. Trichopoulou A, Kouris-Blazos A, Wahlqvist ML, et al. Diet and
+    overall survival in elderly people. BMJ. 1995;311(7018):1457-1460.
+
+19. Willett W, Rockström J, Loken B, et al. Food in the Anthropocene:
+    the EAT-Lancet Commission on healthy diets from sustainable food
+    systems. Lancet. 2019;393(10170):447-492.
+
+======================================================================
+  注：以上引用信息基于 dietaryindex R包 vignette 中的参考文献及
+      PubMed检索。部分指数有多个版本（如HEI有1995/2005/2010/2015/
+      2020版），本R包仅实现了2015和2020版。开山之作指向每个指数
+      概念的原创论文，更新论文指向本包实际使用的版本。
+======================================================================

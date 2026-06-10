@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dietaryindex"
+version = "0.1.0"
+description = "Python implementation of the dietaryindex R package — compute 12 dietary quality indices from NHANES, ASA24, DHQ3, and BLOCK FFQ data"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Dietary Index Team"}
+]
+keywords = [
+    "nutrition",
+    "dietary-index",
+    "epidemiology",
+    "DII",
+    "HEI",
+    "AHEI",
+    "DASH",
+    "MED",
+    "NHANES",
+    "ASA24",
+    "public-health",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Healthcare Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+dependencies = [
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "scipy>=1.10.0",
+    "shap"
+]
+
+[project.optional-dependencies]
+adapters = [
+    "pyreadstat>=1.2.0",
+]
+streamlit = [
+    "streamlit>=1.28.0",
+    "openpyxl>=3.1.0",
+    "xlrd>=2.0.0",
+    "plotly>=5.18.0",
+]
+all = [
+    "pyreadstat>=1.2.0",
+    "streamlit>=1.28.0",
+    "openpyxl>=3.1.0",
+    "xlrd>=2.0.0",
+    "plotly>=5.18.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/jamesjiadazhan/dietaryindex"
+Repository = "https://github.com/jamesjiadazhan/dietaryindex"
+Documentation = "https://github.com/jamesjiadazhan/dietaryindex/blob/main/README.md"
+
+[tool.setuptools.packages.find]
+include = ["dietaryindex*"]
