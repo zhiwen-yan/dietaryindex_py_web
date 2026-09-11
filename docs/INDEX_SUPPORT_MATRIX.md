@@ -1,7 +1,7 @@
 # DietaryIndex-Py index and input-mode support
 
 This document is software interface documentation, not a scientific validation result.
-It describes the 32 base index keys exposed by DietaryIndex-Py v0.2.1. Eight explicit
+It describes the 32 base index keys exposed by DietaryIndex-Py v0.3.0. Eight explicit
 input variants (`HEI2020_V1/V2`, `MEDI_V1/V2`, `ACS2020_V1/V2`, and `PHDI_V1/V2`)
 bring the API and CLI catalog to 40 calculator entries.
 
