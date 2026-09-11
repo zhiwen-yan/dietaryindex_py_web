@@ -1,0 +1,20 @@
+{
+  "name": "dietaryindex-electron",
+  "productName": "DietaryIndex",
+  "version": "0.3.0",
+  "description": "Local-first desktop host for the DietaryIndex dietary scoring platform",
+  "author": "Dietary Index Team",
+  "license": "AGPL-3.0-or-later",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/*.test.js",
+    "package": "node scripts/package-windows.mjs"
+  },
+  "devDependencies": {
+    "@electron/fuses": "2.1.3",
+    "@electron/packager": "20.3.0",
+    "electron": "43.4.1"
+  }
+}

@@ -5,9 +5,6 @@ points and mirror the R-side preprocessing formulas before calling the Python
 core scoring functions.
 """
 
-from pathlib import Path
-import re
-
 import numpy as np
 import pandas as pd
 
@@ -27,37 +24,10 @@ def _unique_preserve_order(values):
     return result
 
 
-def _r_script_path(script_name):
-    return Path(__file__).resolve().parents[3] / "dietaryindex-main" / "R" / script_name
-
-
 def _package_data_path(filename):
+    from pathlib import Path
+
     return Path(__file__).resolve().parents[1] / "data" / filename
-
-
-def _load_r_numeric_vector(script_name, symbol, fallback):
-    path = _r_script_path(script_name)
-    if not path.exists():
-        return fallback
-
-    text = path.read_text(encoding="utf-8")
-    match = re.search(rf"{re.escape(symbol)}\s*=\s*c\((.*?)\)", text, re.S)
-    if not match:
-        return fallback
-
-    values = [int(v) for v in re.findall(r"\d+", match.group(1))]
-    return _unique_preserve_order(values) if values else fallback
-
-
-def _load_r_combined_ssb(script_name, fallback):
-    path = _r_script_path(script_name)
-    if not path.exists():
-        return fallback
-
-    values = []
-    for symbol in ["COFFEE", "TEA", "DRINK"]:
-        values.extend(_load_r_numeric_vector(script_name, symbol, []))
-    return _unique_preserve_order(values) if values else fallback
 
 
 def _load_package_numeric_csv(filename, fallback):
@@ -94,57 +64,60 @@ _SSB_CODES_DEFAULT = _load_package_numeric_csv(
     ],
 )
 
-_DASH_SSB_CODES_DEFAULT = _load_r_combined_ssb("DASH_NHANES_FPED.R", _SSB_CODES_DEFAULT)
-_MEDI_SSB_CODES_DEFAULT = _load_r_combined_ssb("MEDI_NHANES_FPED.R", _SSB_CODES_DEFAULT)
+_DASH_SSB_CODES_DEFAULT = _load_package_numeric_csv(
+    "dash_ssb_fndds_1718_codes.csv", _SSB_CODES_DEFAULT
+)
+_MEDI_SSB_CODES_DEFAULT = _load_package_numeric_csv(
+    "medi_ssb_fndds_1718_codes.csv", _SSB_CODES_DEFAULT
+)
 
-_SKIM_MILK_CODES_DEFAULT = _load_r_numeric_vector(
-    "DASH_NHANES_FPED.R",
-    "SKIM_MILK",
+_SKIM_MILK_CODES_DEFAULT = _load_package_numeric_csv(
+    "dash_skim_milk_fndds_1718_codes.csv",
     [11111170, 11113000, 11114320, 11115000, 11120000, 11121300, 11212050],
 )
-_LOWF_CHEESE_CODES_DEFAULT = _load_r_numeric_vector(
-    "DASH_NHANES_FPED.R",
-    "LOWF_CHEESE",
+_LOWF_CHEESE_CODES_DEFAULT = _load_package_numeric_csv(
+    "dash_lowf_cheese_fndds_1718_codes.csv",
     [14204010, 14204020, 14206010, 14207010],
 )
-_SWEETS_CODES_DEFAULT = _load_r_numeric_vector("MEDI_NHANES_FPED.R", "SWEETS", [53100100])
-_FAT_OIL_CODES_DEFAULT = _load_r_numeric_vector("MEDI_NHANES_FPED.R", "FAT_OIL", [82104000])
-_OLIVE_OIL_CODES_DEFAULT = _load_r_numeric_vector("MEDI_NHANES_FPED.R", "OLIVE_OIL", [82104000])
+_SWEETS_CODES_DEFAULT = _load_package_numeric_csv(
+    "medi_sweets_fndds_1718_codes.csv", [53100100]
+)
+_FAT_OIL_CODES_DEFAULT = _load_package_numeric_csv(
+    "medi_fat_oil_fndds_1718_codes.csv", [82104000]
+)
+_OLIVE_OIL_CODES_DEFAULT = _load_package_numeric_csv(
+    "medi_olive_oil_fndds_1718_codes.csv", [82104000]
+)
 
-_AVOCADO_CODES_DEFAULT = _load_r_numeric_vector("DI_GM_NHANES_FPED.R", "AVOCADO", [63105010])
-_BROCCOLI_CODES_DEFAULT = _load_r_numeric_vector(
-    "DI_GM_NHANES_FPED.R",
-    "BROCCOLI",
+_AVOCADO_CODES_DEFAULT = _load_package_numeric_csv(
+    "di_gm_avocado_fndds_1718_codes.csv", [63105010]
+)
+_BROCCOLI_CODES_DEFAULT = _load_package_numeric_csv(
+    "di_gm_broccoli_fndds_1718_codes.csv",
     [72103000, 72103030, 72201100, 72201190, 72201211, 72201212, 72201220],
 )
-_CHICKPEA_CODES_DEFAULT = _load_r_numeric_vector(
-    "DI_GM_NHANES_FPED.R",
-    "CHICKPEA",
+_CHICKPEA_CODES_DEFAULT = _load_package_numeric_csv(
+    "di_gm_chickpea_fndds_1718_codes.csv",
     [41301990, 41302010, 41302020, 41302040, 41302080, 41302110],
 )
-_COFFEE_CODES_DEFAULT = _load_r_numeric_vector(
-    "DI_GM_NHANES_FPED.R",
-    "COFFEE",
+_COFFEE_CODES_DEFAULT = _load_package_numeric_csv(
+    "di_gm_coffee_fndds_1718_codes.csv",
     [92100000, 92100500, 92101000],
 )
-_CRANBERRY_CODES_DEFAULT = _load_r_numeric_vector(
-    "DI_GM_NHANES_FPED.R",
-    "CRANBERRY",
+_CRANBERRY_CODES_DEFAULT = _load_package_numeric_csv(
+    "di_gm_cranberry_fndds_1718_codes.csv",
     [62109100, 63207010, 63207110],
 )
-_FERMENTED_DAIRY_CODES_DEFAULT = _load_r_numeric_vector(
-    "DI_GM_NHANES_FPED.R",
-    "FERMENTED_DAIRY",
+_FERMENTED_DAIRY_CODES_DEFAULT = _load_package_numeric_csv(
+    "di_gm_fermented_dairy_fndds_1718_codes.csv",
     [11400000, 11410000, 14101010],
 )
-_GREEN_TEA_CODES_DEFAULT = _load_r_numeric_vector(
-    "DI_GM_NHANES_FPED.R",
-    "GREEN_TEA",
+_GREEN_TEA_CODES_DEFAULT = _load_package_numeric_csv(
+    "di_gm_green_tea_fndds_1718_codes.csv",
     [92303010, 92303100, 92305900],
 )
-_SOYBEAN_CODES_DEFAULT = _load_r_numeric_vector(
-    "DI_GM_NHANES_FPED.R",
-    "SOYBEAN",
+_SOYBEAN_CODES_DEFAULT = _load_package_numeric_csv(
+    "di_gm_soybean_fndds_1718_codes.csv",
     [11320000, 11320100, 11320200, 11321000, 11321100, 11321200, 41107010, 41410010],
 )
 
@@ -260,7 +233,15 @@ def _merge_demo(result, demo_path):
     demo_cols = [c for c in demo_df.columns if c not in result.columns and c != "SEQN"]
     if not demo_cols:
         return result
-    return result.merge(demo_df[["SEQN"] + demo_cols], on="SEQN", how="left")
+    merged = result.merge(demo_df[["SEQN"] + demo_cols], on="SEQN", how="left")
+    # Several scorers need sex before component calculation.  Preserve an
+    # existing non-missing GENDER value, but backfill it from the canonical
+    # NHANES RIAGENDR field when DEMO is supplied separately.
+    if "GENDER" in merged.columns and "RIAGENDR" in merged.columns:
+        merged["GENDER"] = pd.to_numeric(merged["GENDER"], errors="coerce").fillna(
+            pd.to_numeric(merged["RIAGENDR"], errors="coerce")
+        )
+    return merged
 
 
 def _average_day_results(day1, day2, preserve_cols=None):
@@ -707,6 +688,8 @@ def _summarize_di_gm(joined, day, code_map):
             "GREEN_TEA": np.where(food_code.isin(code_map["GREEN_TEA"]), grams, 0.0),
             "SOYBEAN": np.where(food_code.isin(code_map["SOYBEAN"]), grams, 0.0),
             "WHOLE_GRAIN": _num(joined, [f"DR{day}I_G_WHOLE"]),
+            "ENERGY": _num(joined, [f"DR{day}IKCAL"]),
+            "TOTAL_FAT": _num(joined, [f"DR{day}ITFAT"]),
             "TOTAL_FAT_PCT": np.where(
                 _num(joined, [f"DR{day}IKCAL"]) > 0,
                 (_num(joined, [f"DR{day}ITFAT"]) * 9.0 / _num(joined, [f"DR{day}IKCAL"])) * 100.0,
@@ -731,6 +714,8 @@ def _summarize_di_gm(joined, day, code_map):
             "GREEN_TEA",
             "SOYBEAN",
             "WHOLE_GRAIN",
+            "ENERGY",
+            "TOTAL_FAT",
             "TOTAL_FAT_PCT",
             "PROCESSED_MEAT",
             "RED_MEAT",
@@ -890,6 +875,7 @@ def compute_ahei_nhanes_fped(
         summary = _summarize_ahei(joined, day, ssb_code)
         if summary is None or summary.empty:
             return None
+        summary = _merge_demo(summary, demo_path)
         return _score_ahei_nhanes(summary, day)
 
     day1 = _compute_day(1, fped_ind_path, nutrient_ind_path)
@@ -966,7 +952,14 @@ def compute_di_gm_nhanes_fped(
     green_tea_code=None,
     soybean_code=None,
     demo_path=None,
+    two_day_method="intake_average",
 ):
+    """Compute DI-GM from NHANES FPED individual-food files.
+
+    two_day_method:
+      - "intake_average" (default): average Day 1/Day 2 component intakes, then score.
+      - "score_average": score each day first, then average scores (R package parity).
+    """
     code_map = {
         "AVOCADO": avocado_code if avocado_code is not None else _AVOCADO_CODES_DEFAULT,
         "BROCCOLI": broccoli_code if broccoli_code is not None else _BROCCOLI_CODES_DEFAULT,
@@ -978,9 +971,11 @@ def compute_di_gm_nhanes_fped(
         "SOYBEAN": soybean_code if soybean_code is not None else _SOYBEAN_CODES_DEFAULT,
     }
 
-    def _compute_day(day, fped_path, nutrient_path):
+    def _compute_day_summary(day, fped_path, nutrient_path):
         joined = _prepare_iff_day(fped_path, nutrient_path, day, filter_positive_line_kcal=True)
-        summary = _summarize_di_gm(joined, day, code_map)
+        return _summarize_di_gm(joined, day, code_map)
+
+    def _score_summary(summary, *, fat_pct_col="TOTAL_FAT_PCT"):
         if summary is None or summary.empty:
             return None
         result = compute_di_gm(
@@ -997,7 +992,7 @@ def compute_di_gm_nhanes_fped(
             green_tea=summary["GREEN_TEA"].values,
             soybean=summary["SOYBEAN"].values,
             whole_grain=summary["WHOLE_GRAIN"].values,
-            total_fat_pct=summary["TOTAL_FAT_PCT"].values,
+            total_fat_pct=summary[fat_pct_col].values,
             processed_meat=summary["PROCESSED_MEAT"].values,
             red_meat=summary["RED_MEAT"].values,
             refined_grain=summary["REFINED_GRAIN"].values,
@@ -1006,7 +1001,24 @@ def compute_di_gm_nhanes_fped(
         result["RESPONDENTID"] = summary["SEQN"].values
         return result
 
-    day1 = _compute_day(1, fped_ind_path, nutrient_ind_path)
-    day2 = _compute_day(2, fped_ind_path2, nutrient_ind_path2)
-    result = _average_day_results(day1, day2, preserve_cols=["RESPONDENTID", "GENDER"])
+    method = str(two_day_method or "intake_average").lower()
+    day1_summary = _compute_day_summary(1, fped_ind_path, nutrient_ind_path)
+    day2_summary = _compute_day_summary(2, fped_ind_path2, nutrient_ind_path2)
+
+    if method in {"score_average", "score", "r"}:
+        day1 = _score_summary(day1_summary, fat_pct_col="TOTAL_FAT_PCT")
+        day2 = _score_summary(day2_summary, fat_pct_col="TOTAL_FAT_PCT")
+        result = _average_day_results(day1, day2, preserve_cols=["RESPONDENTID", "GENDER"])
+    elif method in {"intake_average", "intake", "paper"}:
+        summary = _average_day_results(day1_summary, day2_summary, preserve_cols=["GENDER"])
+        if summary is None or summary.empty:
+            result = None
+        else:
+            energy = pd.to_numeric(summary.get("ENERGY", 0), errors="coerce").fillna(0.0)
+            fat = pd.to_numeric(summary.get("TOTAL_FAT", 0), errors="coerce").fillna(0.0)
+            summary["TOTAL_FAT_PCT_FROM_AVG"] = np.where(energy > 0, (fat * 9.0 / energy) * 100.0, 0.0)
+            result = _score_summary(summary, fat_pct_col="TOTAL_FAT_PCT_FROM_AVG")
+    else:
+        raise ValueError("two_day_method must be 'intake_average' or 'score_average'")
+
     return _merge_demo(result, demo_path)

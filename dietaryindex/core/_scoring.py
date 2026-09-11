@@ -1,20 +1,39 @@
-"""
-通用评分函数库 - General Scoring Functions
+"""General scoring utilities shared across dietary indices.
 
-为所有膳食指数提供统一的评分计算工具函数。
-所有算法均从 dietaryindex R 包源码精确翻译。
+This module now exposes two layers of helpers:
+
+1. Direct scoring helpers used by the existing translated indices.
+2. A reusable reference-cutoff engine for future indices that depend on
+   sample medians, quantiles, or sex-specific reference distributions.
 """
+
+from __future__ import annotations
+
+from collections.abc import Mapping, Sequence
 
 import numpy as np
 import pandas as pd
 
 
+REFERENCE_METHOD_PROBABILITIES = {
+    "median": (0.5,),
+    "quartile": (0.0, 0.25, 0.5, 0.75, 1.0),
+    "quintile": (0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+    "decile": tuple(np.linspace(0.0, 1.0, 11)),
+}
+
+REFERENCE_METADATA_COLUMNS = {
+    "variable",
+    "method",
+    "rank",
+    "prob",
+    "cutoff",
+    "n_non_missing",
+}
+
+
 def _safe_nanquantile(a, q):
-    """
-    Safely calculate nanquantile when there are infinite values (inf).
-    Numpy's linear interpolation returns NaN when subtracting inf from inf,
-    whereas R's quantile function handles inf correctly.
-    """
+    """Safely calculate nanquantiles when the input contains infinite values."""
     a = np.asarray(a, dtype=float)
     is_inf = np.isinf(a)
     is_pos_inf = is_inf & (a > 0)
@@ -26,31 +45,381 @@ def _safe_nanquantile(a, q):
         return np.nanquantile(a, q)
     max_val = np.nanmax(finite_a)
     min_val = np.nanmin(finite_a)
-    # Map infs to huge but finite numbers
     huge_pos = max_val + 1e15
     huge_neg = min_val - 1e15
     a_mapped = np.where(is_pos_inf, huge_pos, np.where(is_neg_inf, huge_neg, a))
     quantiles = np.nanquantile(a_mapped, q)
-    # Map back to inf
     threshold_pos = max_val + 1e14
     threshold_neg = min_val - 1e14
     return np.where(
-        quantiles > threshold_pos, np.inf,
-        np.where(quantiles < threshold_neg, -np.inf, quantiles)
+        quantiles > threshold_pos,
+        np.inf,
+        np.where(quantiles < threshold_neg, -np.inf, quantiles),
     )
 
 
+def _normalize_probabilities(method: str, probs: Sequence[float] | None = None) -> np.ndarray:
+    method = str(method).lower()
+    if probs is None:
+        if method not in REFERENCE_METHOD_PROBABILITIES:
+            raise ValueError(f"Unsupported reference method: {method}")
+        probs = REFERENCE_METHOD_PROBABILITIES[method]
+    probs_arr = np.asarray(probs, dtype=float)
+    if probs_arr.ndim != 1 or probs_arr.size == 0:
+        raise ValueError("Reference probabilities must be a one-dimensional sequence.")
+    if np.any(np.diff(probs_arr) < 0):
+        raise ValueError("Reference probabilities must be sorted in ascending order.")
+    if probs_arr[0] < 0 or probs_arr[-1] > 1:
+        raise ValueError("Reference probabilities must fall within [0, 1].")
+    return probs_arr
+
+
+def _normalize_group_columns(groupby) -> list[str]:
+    if groupby is None:
+        return []
+    if isinstance(groupby, str):
+        return [groupby]
+    return [str(col) for col in groupby]
+
+
+def _coerce_numeric_series(actual, name: str = "value") -> pd.Series:
+    if isinstance(actual, pd.Series):
+        series = actual.reset_index(drop=True)
+        if series.name is None:
+            series.name = name
+    else:
+        series = pd.Series(actual, name=name)
+    return pd.to_numeric(series, errors="coerce")
+
+
+def fit_reference_cutoffs(
+    data,
+    columns: Sequence[str] | None = None,
+    *,
+    method: str = "quintile",
+    groupby=None,
+    probs: Sequence[float] | None = None,
+) -> pd.DataFrame:
+    """Fit reusable reference cutoffs from a dataset.
+
+    Parameters
+    ----------
+    data:
+        A DataFrame or Series containing the variables used to estimate the
+        reference distribution.
+    columns:
+        Variable columns to fit. When omitted, all non-group columns are used.
+    method:
+        One of ``median``, ``quartile``, ``quintile``, ``decile`` or a custom
+        method name when ``probs`` is explicitly supplied.
+    groupby:
+        Optional grouping column(s), such as ``gender``. Separate reference
+        tables are generated for each stratum.
+    probs:
+        Optional explicit probabilities. This is useful for custom reference
+        grids while still preserving the same export format.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A long-format table with one row per cutoff. The table is deliberately
+        tidy so it can be exported to CSV and reused later.
+    """
+
+    method = str(method).lower()
+    probabilities = _normalize_probabilities(method, probs=probs)
+    group_cols = _normalize_group_columns(groupby)
+
+    if isinstance(data, pd.Series):
+        series_name = data.name or "value"
+        df = data.to_frame(name=series_name)
+        if columns is None:
+            columns = [series_name]
+    else:
+        df = pd.DataFrame(data).copy()
+        if columns is None:
+            columns = [col for col in df.columns if col not in group_cols]
+
+    columns = list(dict.fromkeys(columns or []))
+    if not columns:
+        raise ValueError("At least one variable column is required to fit references.")
+
+    missing_cols = [col for col in [*group_cols, *columns] if col not in df.columns]
+    if missing_cols:
+        raise KeyError(f"Missing columns for reference fitting: {missing_cols}")
+
+    rows = []
+    work_df = df[group_cols + columns].copy()
+    if group_cols:
+        grouped = work_df.groupby(group_cols, dropna=False, sort=True)
+        iterator = grouped
+    else:
+        iterator = [((), work_df)]
+
+    for group_key, frame in iterator:
+        if not isinstance(group_key, tuple):
+            group_key = (group_key,)
+        base = dict(zip(group_cols, group_key)) if group_cols else {}
+
+        for column in columns:
+            values = pd.to_numeric(frame[column], errors="coerce").to_numpy(dtype=float)
+            cutoff_values = np.asarray(_safe_nanquantile(values, probabilities), dtype=float).reshape(-1)
+            valid_count = int(np.sum(~np.isnan(values)))
+
+            for rank, (prob, cutoff) in enumerate(zip(probabilities, cutoff_values)):
+                rows.append(
+                    {
+                        **base,
+                        "variable": column,
+                        "method": method,
+                        "rank": rank,
+                        "prob": float(prob),
+                        "cutoff": float(cutoff),
+                        "n_non_missing": valid_count,
+                    }
+                )
+
+    result_columns = group_cols + [
+        "variable",
+        "method",
+        "rank",
+        "prob",
+        "cutoff",
+        "n_non_missing",
+    ]
+    return pd.DataFrame(rows, columns=result_columns)
+
+
+def get_reference_group_columns(reference) -> list[str]:
+    """Return grouping columns carried by a reference-cutoff table."""
+    reference_df = pd.DataFrame(reference)
+    return [col for col in reference_df.columns if col not in REFERENCE_METADATA_COLUMNS]
+
+
+def get_reference_cutoffs(
+    reference,
+    variable: str,
+    *,
+    method: str | None = None,
+    filters: Mapping[str, object] | None = None,
+) -> pd.DataFrame:
+    """Filter a long-format reference table down to one variable/stratum."""
+    reference_df = pd.DataFrame(reference).copy()
+    subset = reference_df.loc[reference_df["variable"] == variable].copy()
+    if method is not None:
+        subset = subset.loc[subset["method"] == str(method).lower()].copy()
+    for key, value in (filters or {}).items():
+        if key not in subset.columns:
+            raise KeyError(f"Reference filter column not found: {key}")
+        if pd.isna(value):
+            subset = subset.loc[subset[key].isna()].copy()
+        else:
+            subset = subset.loc[subset[key] == value].copy()
+    if subset.empty:
+        raise KeyError(f"No reference cutoffs found for variable={variable!r}, filters={filters!r}")
+    methods = subset["method"].dropna().unique().tolist()
+    if len(methods) != 1:
+        raise ValueError(
+            "Reference subset must resolve to exactly one method before scoring. "
+            f"Found methods: {methods}"
+        )
+    group_cols = get_reference_group_columns(subset)
+    if group_cols and len(subset[group_cols].drop_duplicates()) != 1:
+        raise ValueError(
+            "Reference subset resolves to multiple strata. "
+            "Please pass group filters so that one stratum remains."
+        )
+    return subset.sort_values("rank").reset_index(drop=True)
+
+
+def reference_table_to_wide(reference) -> pd.DataFrame:
+    """Convert a long reference table into a CSV-friendly wide format."""
+    reference_df = pd.DataFrame(reference).copy()
+    group_cols = get_reference_group_columns(reference_df)
+    index_cols = group_cols + ["variable", "method", "n_non_missing"]
+    wide = (
+        reference_df.pivot_table(
+            index=index_cols,
+            columns="rank",
+            values="cutoff",
+            aggfunc="first",
+        )
+        .reset_index()
+        .rename(columns=lambda col: f"cutoff_{col}" if isinstance(col, (int, np.integer)) else col)
+    )
+    return wide
+
+
+def _resolve_scores(bin_count: int, direction: str, scores: Sequence[float] | None) -> np.ndarray:
+    if scores is None:
+        base = np.arange(1, bin_count + 1, dtype=float)
+        if direction == "unhealthy":
+            base = base[::-1]
+        return base
+    scores_arr = np.asarray(scores, dtype=float)
+    if scores_arr.shape != (bin_count,):
+        raise ValueError(f"Expected {bin_count} scores, got shape {scores_arr.shape}.")
+    return scores_arr
+
+
+def score_quantile_with_cutoffs(
+    actual,
+    cutoffs,
+    *,
+    direction: str = "healthy",
+    scores: Sequence[float] | None = None,
+    zero_as_lowest: bool = True,
+):
+    """Score an array against a set of ordered cutoffs.
+
+    ``scores`` is interpreted from low intake to high intake. When it is not
+    supplied, the helper defaults to 1..N for ``healthy`` and N..1 for
+    ``unhealthy``.
+    """
+
+    direction = str(direction).lower()
+    if direction not in {"healthy", "unhealthy"}:
+        raise ValueError("direction must be either 'healthy' or 'unhealthy'.")
+
+    values = np.asarray(actual, dtype=float)
+    thresholds = np.asarray(cutoffs, dtype=float).reshape(-1)
+    if thresholds.size < 2:
+        raise ValueError("At least two cutoff values are required.")
+    if np.any(np.diff(thresholds) < 0):
+        raise ValueError("Cutoff values must be sorted in ascending order.")
+
+    bin_count = thresholds.size - 1
+    score_values = _resolve_scores(bin_count, direction, scores)
+    inner_thresholds = thresholds[1:-1]
+    bin_index = np.searchsorted(inner_thresholds, values, side="right")
+    if zero_as_lowest:
+        bin_index = np.where(values == 0, 0, bin_index)
+    result = score_values[np.clip(bin_index, 0, bin_count - 1)]
+    result = np.asarray(result, dtype=float)
+    result[np.isnan(values)] = np.nan
+    return result
+
+
+def score_median_with_cutoff(actual, median, *, direction: str = "healthy"):
+    """Score an array using a binary median cutoff."""
+    direction = str(direction).lower()
+    if direction not in {"healthy", "unhealthy"}:
+        raise ValueError("direction must be either 'healthy' or 'unhealthy'.")
+
+    values = np.asarray(actual, dtype=float)
+    if direction == "healthy":
+        result = np.where((values < median) | (values == 0), 0.0, 1.0)
+    else:
+        result = np.where((values < median) | (values == 0), 1.0, 0.0)
+    result[np.isnan(values)] = np.nan
+    return result
+
+
+def _normalize_group_frame(group, group_cols: list[str], length: int) -> pd.DataFrame:
+    if not group_cols:
+        return pd.DataFrame(index=range(length))
+    if group is None:
+        raise ValueError(f"Group values are required for grouped references: {group_cols}")
+
+    if isinstance(group, pd.Series):
+        frame = group.to_frame(name=group.name or group_cols[0]).reset_index(drop=True)
+    elif isinstance(group, pd.DataFrame):
+        frame = group.reset_index(drop=True).copy()
+    elif isinstance(group, Mapping):
+        frame = pd.DataFrame(group).reset_index(drop=True)
+    else:
+        raise TypeError("group must be a pandas Series, DataFrame, or mapping of arrays/Series.")
+
+    missing_group_cols = [col for col in group_cols if col not in frame.columns]
+    if missing_group_cols:
+        raise KeyError(f"Missing group columns for reference scoring: {missing_group_cols}")
+    if len(frame) != length:
+        raise ValueError(
+            "Group values must have the same length as the data being scored. "
+            f"Got {len(frame)} rows for {length} observations."
+        )
+    return frame[group_cols]
+
+
+def _score_with_reference_subset(
+    actual: pd.Series,
+    subset: pd.DataFrame,
+    *,
+    direction: str,
+    scores: Sequence[float] | None,
+    zero_as_lowest: bool,
+) -> np.ndarray:
+    subset = subset.sort_values("rank").reset_index(drop=True)
+    method = subset.loc[0, "method"]
+    cutoffs = subset["cutoff"].to_numpy(dtype=float)
+    if method == "median":
+        if cutoffs.size != 1:
+            raise ValueError("Median references must contain exactly one cutoff row.")
+        return score_median_with_cutoff(actual, cutoffs[0], direction=direction)
+    return score_quantile_with_cutoffs(
+        actual,
+        cutoffs,
+        direction=direction,
+        scores=scores,
+        zero_as_lowest=zero_as_lowest,
+    )
+
+
+def score_series_with_reference(
+    actual,
+    reference,
+    *,
+    variable: str,
+    direction: str = "healthy",
+    group=None,
+    scores: Sequence[float] | None = None,
+    zero_as_lowest: bool = True,
+):
+    """Apply a reusable reference table back to a series of observations."""
+
+    actual_series = _coerce_numeric_series(actual, name=variable)
+    reference_df = pd.DataFrame(reference).copy()
+    reference_df = reference_df.loc[reference_df["variable"] == variable].copy()
+    if reference_df.empty:
+        raise KeyError(f"Reference table does not contain variable: {variable}")
+
+    group_cols = get_reference_group_columns(reference_df)
+    if not group_cols:
+        return _score_with_reference_subset(
+            actual_series,
+            reference_df,
+            direction=direction,
+            scores=scores,
+            zero_as_lowest=zero_as_lowest,
+        )
+
+    group_frame = _normalize_group_frame(group, group_cols, len(actual_series))
+    result = np.full(len(actual_series), np.nan, dtype=float)
+
+    for _, combo in group_frame.drop_duplicates().iterrows():
+        mask = pd.Series(True, index=group_frame.index)
+        subset = reference_df
+        filter_dict = {}
+        for column in group_cols:
+            value = combo[column]
+            filter_dict[column] = value
+            if pd.isna(value):
+                mask &= group_frame[column].isna()
+            else:
+                mask &= group_frame[column].eq(value)
+        subset = get_reference_cutoffs(reference_df, variable, filters=filter_dict)
+        result[mask.to_numpy()] = _score_with_reference_subset(
+            actual_series.loc[mask],
+            subset,
+            direction=direction,
+            scores=scores,
+            zero_as_lowest=zero_as_lowest,
+        )
+    return result
+
+
 def score_healthy(actual, min_val, max_val, min_score=0.0, max_score=5.0):
-    """
-    健康成分线性评分（摄入越多分越高）
-
-    等效于 R 中的 SCORE_HEALTHY 函数：
-        if actual >= max_val → max_score
-        if actual <= min_val → min_score
-        else → min_score + (actual - min_val) * max_score / (max_val - min_val)
-
-    用于: AHEI, HEI2015, HEI2020, PHDI
-    """
+    """Linear score for healthy components where higher intake is better."""
     actual = np.asarray(actual, dtype=float)
     result = np.where(
         actual >= max_val,
@@ -58,23 +427,14 @@ def score_healthy(actual, min_val, max_val, min_score=0.0, max_score=5.0):
         np.where(
             actual <= min_val,
             min_score,
-            min_score + (actual - min_val) * max_score / (max_val - min_val)
-        )
+            min_score + (actual - min_val) * max_score / (max_val - min_val),
+        ),
     )
     return result
 
 
 def score_unhealthy(actual, min_val, max_val, min_score=0.0, max_score=10.0):
-    """
-    不健康成分线性评分（摄入越多分越低）
-
-    等效于 R 中的 SCORE_UNHEALTHY 函数：
-        if actual >= min_val → min_score
-        if actual <= max_val → max_score
-        else → min_score + (actual - min_val) * max_score / (max_val - min_val)
-
-    用于: AHEI, HEI2015, HEI2020, PHDI
-    """
+    """Linear score for unhealthy components where lower intake is better."""
     actual = np.asarray(actual, dtype=float)
     result = np.where(
         actual >= min_val,
@@ -82,155 +442,53 @@ def score_unhealthy(actual, min_val, max_val, min_score=0.0, max_score=10.0):
         np.where(
             actual <= max_val,
             max_score,
-            min_score + (actual - min_val) * max_score / (max_val - min_val)
-        )
+            min_score + (actual - min_val) * max_score / (max_val - min_val),
+        ),
     )
     return result
 
 
 def score_quintile_healthy(actual):
-    """
-    五等分正向评分（健康成分，摄入越多分越高）
-
-    等效于 R 中的 quintile_healthy 函数：
-        基于数据集的五分位数，将人群分为 1-5 分
-
-    用于: DASH, DASHI
-    """
-    actual = np.asarray(actual, dtype=float)
-    quintiles = _safe_nanquantile(actual, np.linspace(0, 1, 6))
-    conditions = [
-        ((actual >= quintiles[0]) & (actual < quintiles[1])) | (actual == 0),
-        (actual >= quintiles[1]) & (actual < quintiles[2]) & (actual != 0),
-        (actual >= quintiles[2]) & (actual < quintiles[3]) & (actual != 0),
-        (actual >= quintiles[3]) & (actual < quintiles[4]) & (actual != 0),
-        (actual >= quintiles[4]) & (actual <= quintiles[5]) & (actual != 0)
-    ]
-    choices = [1, 2, 3, 4, 5]
-    return np.select(conditions, choices, default=np.nan)
+    """Positive quintile scoring derived from the sample distribution."""
+    cutoffs = _safe_nanquantile(np.asarray(actual, dtype=float), np.linspace(0, 1, 6))
+    return score_quantile_with_cutoffs(actual, cutoffs, direction="healthy")
 
 
 def score_quintile_unhealthy(actual):
-    """
-    五等分反向评分（不健康成分，摄入越多分越低）
-
-    等效于 R 中的 quintile_unhealthy 函数：
-        基于数据集的五分位数，反向分配 5-1 分
-
-    用于: DASH, DASHI
-    """
-    actual = np.asarray(actual, dtype=float)
-    quintiles = _safe_nanquantile(actual, np.linspace(0, 1, 6))
-    conditions = [
-        ((actual >= quintiles[0]) & (actual < quintiles[1])) | (actual == 0),
-        (actual >= quintiles[1]) & (actual < quintiles[2]) & (actual != 0),
-        (actual >= quintiles[2]) & (actual < quintiles[3]) & (actual != 0),
-        (actual >= quintiles[3]) & (actual < quintiles[4]) & (actual != 0),
-        (actual >= quintiles[4]) & (actual <= quintiles[5]) & (actual != 0)
-    ]
-    choices = [5, 4, 3, 2, 1]
-    return np.select(conditions, choices, default=np.nan)
+    """Reverse quintile scoring derived from the sample distribution."""
+    cutoffs = _safe_nanquantile(np.asarray(actual, dtype=float), np.linspace(0, 1, 6))
+    return score_quantile_with_cutoffs(actual, cutoffs, direction="unhealthy")
 
 
 def score_median_healthy(actual):
-    """
-    中位数正向评分（健康成分，高于中位数=1分）
-
-    等效于 R 中的 median_healthy 函数
-
-    用于: MED, MEDI
-    """
-    actual = np.asarray(actual, dtype=float)
-    median_val = np.nanmedian(actual)
-    res = np.where(
-        (actual < median_val) | (actual == 0),
-        0.0,
-        1.0
-    )
-    res[np.isnan(actual)] = np.nan
-    return res
+    """Positive median scoring derived from the sample median."""
+    median_val = np.nanmedian(np.asarray(actual, dtype=float))
+    return score_median_with_cutoff(actual, median_val, direction="healthy")
 
 
 def score_median_unhealthy(actual):
-    """
-    中位数反向评分（不健康成分，高于中位数=0分）
-
-    等效于 R 中的 median_unhealthy 函数
-
-    用于: MED, MEDI
-    """
-    actual = np.asarray(actual, dtype=float)
-    median_val = np.nanmedian(actual)
-    res = np.where(
-        (actual < median_val) | (actual == 0),
-        1.0,
-        0.0
-    )
-    res[np.isnan(actual)] = np.nan
-    return res
+    """Reverse median scoring derived from the sample median."""
+    median_val = np.nanmedian(np.asarray(actual, dtype=float))
+    return score_median_with_cutoff(actual, median_val, direction="unhealthy")
 
 
 def score_quartile_healthy(actual, score_values=(0.0, 0.25, 0.5, 0.75)):
-    """
-    四等分正向评分
-
-    等效于 R 中的 quintile_healthy1 函数
-
-    用于: ACS2020_V1
-    """
-    actual = np.asarray(actual, dtype=float)
-    quartiles = np.nanquantile(actual, np.linspace(0, 1, 5))
-    conditions = [
-        actual > quartiles[3],
-        (actual > quartiles[2]) & (actual <= quartiles[3]),
-        (actual > quartiles[1]) & (actual <= quartiles[2]),
-        actual <= quartiles[1]
-    ]
-    return np.select(conditions, list(reversed(score_values)), default=0)
+    """Positive quartile scoring derived from the sample distribution."""
+    cutoffs = np.nanquantile(np.asarray(actual, dtype=float), np.linspace(0, 1, 5))
+    return score_quantile_with_cutoffs(actual, cutoffs, scores=score_values)
 
 
 def score_quartile_unhealthy(actual, score_values=(0.0, 1.0, 2.0, 3.0)):
-    """
-    四等分反向评分
-
-    等效于 R 中的 quintile_unhealthy4 函数
-
-    用于: ACS2020_V1
-    """
-    actual = np.asarray(actual, dtype=float)
-    quartiles = np.nanquantile(actual, np.linspace(0, 1, 5))
-    conditions = [
-        actual > quartiles[3],
-        (actual > quartiles[2]) & (actual <= quartiles[3]),
-        (actual > quartiles[1]) & (actual <= quartiles[2]),
-        actual <= quartiles[1]
-    ]
-    return np.select(conditions, score_values, default=0)
+    """Reverse quartile scoring derived from the sample distribution."""
+    cutoffs = np.nanquantile(np.asarray(actual, dtype=float), np.linspace(0, 1, 5))
+    return score_quantile_with_cutoffs(actual, cutoffs, scores=list(reversed(score_values)))
 
 
 def score_decile_sodium(sodium_serv):
-    """
-    钠摄入十一等分逆序评分
-
-    等效于 R 中 AHEI 的 SODIUM_DECILE 逻辑：
-        decile 1-11 → 分数 10-0
-        区间划分：
-        [deciles[i], deciles[i+1]) -> 10-i (对于 i = 0..9)
-        [deciles[10], deciles[11]] -> 0
-
-    用于: AHEI
-    """
-    sodium_serv = np.asarray(sodium_serv, dtype=float)
-    deciles = _safe_nanquantile(sodium_serv, np.linspace(0, 1, 12))
-    conditions = []
-    # Score 10 down to 1 (left-closed, right-open)
-    for i in range(10):
-        conditions.append(
-            (sodium_serv >= deciles[i]) & (sodium_serv < deciles[i + 1])
-        )
-    # Score 0 (both boundaries closed)
-    conditions.append(
-        (sodium_serv >= deciles[10]) & (sodium_serv <= deciles[11])
+    """AHEI sodium scoring using sample-derived deciles."""
+    deciles = _safe_nanquantile(np.asarray(sodium_serv, dtype=float), np.linspace(0, 1, 12))
+    return score_quantile_with_cutoffs(
+        sodium_serv,
+        deciles,
+        scores=list(range(10, -1, -1)),
     )
-    choices = list(range(10, -1, -1))
-    return np.select(conditions, choices, default=np.nan)

@@ -79,6 +79,7 @@ def _compute_hei2020_core(
             asugar_pct = np.asarray(added_sugar, dtype=float)
             sfat_pct = np.asarray(saturated_fat, dtype=float)
             na_g = np.asarray(sodium, dtype=float)
+            na_density = na_g / density_divider
         else:
             asugar_tsp = np.asarray(added_sugar, dtype=float)
             asugar_pct = (asugar_tsp * 16.0) / kcal * 100.0
@@ -86,8 +87,7 @@ def _compute_hei2020_core(
             sfat_pct = (sfat_g * 9.0) / kcal * 100.0
             na_mg = np.asarray(sodium, dtype=float)
             na_g = na_mg / 1000.0
-
-        na_density = na_g / density_divider
+            na_density = na_g / density_divider
 
     is_adult = age >= 2
     is_toddler = (age >= 1) & (age < 2)
@@ -98,7 +98,7 @@ def _compute_hei2020_core(
         adult_scores = score_fn(values, adult_min, adult_max, 0, max_score)
         toddler_scores = score_fn(values, toddler_min, toddler_max, 0, max_score)
         # Check if age is nan or neither
-        result = np.where(is_adult, adult_scores, np.where(is_toddler, toddler_scores, 0.0))
+        result = np.where(is_adult, adult_scores, np.where(is_toddler, toddler_scores, np.nan))
         # Propagate nan when age or value is nan
         result[np.isnan(age) | np.isnan(values)] = np.nan
         return result
@@ -123,7 +123,7 @@ def _compute_hei2020_core(
     zero_mask = (kcal == 0) & (~np.isnan(kcal))
     if zero_mask.any():
         for arr in [s_tfruit, s_wfruit, s_tveg, s_gbean, s_tpro, s_spro,
-                    s_wgrain, s_dair, s_fa, s_rgrain, s_asugar]:
+                    s_wgrain, s_dair, s_fa, s_rgrain, s_na, s_asugar, s_sfat]:
             arr[zero_mask] = 0.0
         hei_all[zero_mask] = 0.0
 
@@ -163,7 +163,7 @@ def compute_hei2020(
 
     added_sugar: % of total energy
     saturated_fat: % of total energy
-    sodium: g/1000 kcal
+    sodium: total g/day (converted internally to g/1000 kcal)
     """
     scores = _compute_hei2020_core(
         age, total_kcal,

@@ -2,7 +2,7 @@
 ACS2020 - American Cancer Society 2020 Dietary Index
 
 精确翻译自 dietaryindex R 包 ACS2020_V1.R 与 ACS2020_V2.R 源码。
-V1: 基于四等分的饮食评分，总分 0-15。
+V1: 基于四等分的饮食评分，总分 0-12。
 V2: 使用 %能量 计算高加工食品和精制谷物组分，且包括蔬菜和水果评分。
 """
 

@@ -1,0 +1,27 @@
+Variable,Unit name,TIS,NRVs
+Protein,G,0.021,65
+Total_fat,G,0.298,54.17
+Carbohydrate,G,0.097,120
+Energy,KCAL,0.18,1950
+Fiber,G,-0.663,30
+Iron,MG,0.032,12
+Magnesium,MG,-0.484,320
+Zinc,MG,-0.313,12
+Selenium,UG,-0.191,60
+Vitamin_A,UG,-0.401,750
+Carotene_alpha,UG,-0.584,3718
+Vitamin_E,MG,-0.419,14
+Vitamin_C,MG,-0.424,100
+Thiamin,MG,-0.098,1.4
+Riboflavin,MG,-0.068,1.4
+Niacin,MG,-0.2462,15
+Cholesterol,MG,0.11,279.4
+Saturated_fat,G,0.373,21.67
+PUFA_18_2,G,-0.159,12.46
+PUFA_18_3,G,-0.436,2.71
+PUFA_20_4,G,-0.159,12.46
+DHA,G,-0.436,2.71
+EPA,G,-0.436,2.71
+DPA,G,-0.436,2.71
+total_monounsaturated,G,-0.009,27
+total_polyunsaturated,G,-0.337,15.17

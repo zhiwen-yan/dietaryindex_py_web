@@ -1,333 +1,344 @@
-# dietaryindex (Python)
+# DietaryIndex-Py
 
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://python.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://python.org)
+[![License: AGPL--3.0--or--later](https://img.shields.io/badge/License-AGPL--3.0--or--later-green.svg)](LICENSE)
 
-* [English](#english)
-* [中文说明](#中文说明)
+`dietaryindex` 是一个面向营养流行病学与膳食模式研究的 Python 项目，当前同时提供：
 
----
+- Python 包
+- Next.js 正式网页端
+- FastAPI 接口
+- CLI 命令行
 
-## English
+它的目标不是只做“几个公式”，而是做成一个可复用的膳食指数计算平台：既适合研究者在网页里上传数据，也适合未来让外部网站、脚本、AI 工作流、Codex 或其他客户端通过 API 调用。
 
-A pure Python implementation of the `dietaryindex` package, fully replicating the scoring algorithms of the original [`dietaryindex` R package](https://github.com/jamesjiadazhan/dietaryindex) (by James J. Zhan) for 12 internationally recognized dietary quality indices.
+学术使用说明：
 
-### 📊 Supported Dietary Indices
-
-| Index | Name | Components | Score Range |
-|-------|------|:----------:|:-----------:|
-| 🔥 **DII** | Dietary Inflammatory Index | 45 | No upper limit |
-| 📊 **HEI-2020** | Healthy Eating Index 2020 | 13 | 0–100 |
-| 📊 **HEI-2015** | Healthy Eating Index 2015 | 13 | 0–100 |
-| 🫀 **AHEI** | Alternative Healthy Eating Index | 11 | 0–110 |
-| 🤰 **AHEIP** | AHEI Pregnancy | 9 | 0–90 |
-| 💚 **DASH** | DASH Diet Score | 8 | 8–40 |
-| ❤️ **DASHI** | DASH Nutrient Density | 9 | 0–9 |
-| 🫒 **MED** | Mediterranean Diet Index | 9 | 0–9 |
-| 🐟 **MEDI** | MEDI (PREDIMED) | 11 | 0–11 |
-| 🎗️ **ACS2020** | ACS Cancer Prevention | 8 | 0–15 |
-| 🌍 **PHDI** | Planetary Health Diet Index | 16 | 0–150 |
-| 🦠 **DI-GM** | Dietary Index for Gut Microbiota | 14 | 0–14 |
+- 真实研究数据优先建议本地计算，不建议默认上传到公网服务器。
+- 使用本项目的软件、数据库整理成果或方法实现进行科研分析时，应在论文、预印本、学位论文或报告中明确致谢并引用本项目及其关联论文。
+- 当前仓库使用 `AGPL-3.0-or-later`，代码再分发或网络服务化时需要保留相应开源义务。
 
 ---
 
-### 🚀 Installation
+## 当前能力概览
 
-#### Option 1: Via PyPI (Recommended)
+### 已接入的核心指数
+
+| 指数 | 英文名 | 总分 |
+|---|---|---:|
+| DII | Dietary Inflammatory Index | 全部45组分时理论约-13.152至+13.152 |
+| HEI-2020 | Healthy Eating Index 2020 | 0-100 |
+| HEI-2015 | Healthy Eating Index 2015 | 0-100 |
+| AHEI | Alternative Healthy Eating Index | 0-110 |
+| AHEIP | AHEI Pregnancy | 0-90 |
+| DASH | DASH Diet Score | 8-40 |
+| DASHI | DASH Nutrient Density Index | 0-9 |
+| MED | Mediterranean Diet Score | 0-9 |
+| MEDI | Mediterranean Diet Index (PREDIMED-style) | 0-11 |
+| ACS2020 | American Cancer Society 2020 Index | 0-12 |
+| PHDI | Planetary Health Diet Index | 0-140 |
+| DI-GM | Dietary Index for Gut Microbiota | 0-14 |
+| FISI | Food Inflammatory Score Index | 连续型、无固定界限 |
+| PDI / hPDI / uPDI | Plant-based Diet Index family | 18-90（样本人群五分位依赖） |
+| MIND | Mediterranean-DASH Intervention for Neurodegenerative Delay | 0-15 |
+| DQI-I | Diet Quality Index-International | 0-100 |
+| CHEI | Chinese Healthy Eating Index | 0-100 |
+| DBI-07 | Diet Balance Index | DQD 0-84；另含 TS/HBS/LBS |
+| GDQS | Global Diet Quality Score | 0-49 |
+| WISH | World Index for Sustainability and Health | 0-130 |
+| NRF9.3 | Nutrient Rich Foods Index | 默认封顶版 -300–900；另提供显式 uncapped-LIM 敏感性版本 |
+| NAR | Nutrient Adequacy Ratio | 0-1 |
+| MAR | Mean Adequacy Ratio | 0-100 |
+| INQ | Index of Nutritional Quality | ≥0、无固定上限 |
+| PRAL | Potential Renal Acid Load | 连续型、无固定界限 |
+| NEAP | Net Endogenous Acid Production | 有效非负输入时≥-10.2、无固定上限 |
+| EDII | Empirical Dietary Inflammatory Index（兼容键 `E_DII`） | 连续型、无固定界限 |
+| CHINA-DII | China Dietary Inflammatory Index（23组分表） | 约-5.871至+5.871 |
+| modified CDAI | Modified six-z Composite Dietary Antioxidant Index | 标准化和、无固定界限 |
+| OBS | Oxidative Balance Score | 0-40 |
+
+### 已支持的数据入口
+
+完整的32个基础指数、8个显式版本和各数据入口支持情况见
+[`docs/INDEX_SUPPORT_MATRIX.md`](docs/INDEX_SUPPORT_MATRIX.md)。该矩阵描述软件接口支持，
+不等同于科学验证结论。
+
+| 数据入口 | 说明 |
+|---|---|
+| 通用模式 | 上传 CSV / Excel，网页或服务层做字段映射 |
+| NHANES FPED | 2005 年后多文件流程 |
+| NHANES MPED | 1999-2004 多文件流程 |
+| ASA24 | Totals.csv 自动汇总 |
+| DHQ3 | 单文件快捷模式 |
+| BLOCK FFQ | 单文件快捷模式 |
+| FII 数据库 | USDA / FNDDS 食物级炎症潜力检索 |
+
+---
+
+## 你可以怎么用这个项目
+
+### 1. 网页端用户
+
+适合不写代码的研究者。
+启动 Next.js 网站和 FastAPI 后，可以在浏览器里：
+
+- 选择指数
+- 选择上传模式
+- 自动/手动映射字段
+- 计算结果
+- 下载结果表
+- 查询 FII 数据库
+
+### 2. Python 包用户
+
+适合在 Notebook、分析脚本、批处理流程中调用。
+
+### 3. API 用户
+
+适合未来正式网站、外部前端、自动化平台、AI agent、Codex、第三方系统集成。
+
+### 4. CLI 用户
+
+适合本地快速批处理和服务器脚本任务。
+
+---
+
+## 安装
+
+### 方式一：从本地源码安装（当前最推荐）
 
 ```bash
-# Core package only (numpy + pandas + scipy)
-pip install dietaryindex
-
-# With NHANES adapters (requires pyreadstat for SAS/XPT files)
-pip install dietaryindex[adapters]
-
-# With Streamlit Web Interface (plotly + openpyxl)
-pip install dietaryindex[streamlit]
-
-# Install all dependencies
-pip install dietaryindex[all]
-```
-
-#### Option 2: From Source
-
-```bash
-git clone https://github.com/zhiwen-yan/dietaryindex_py.git
+git clone https://github.com/zhiwen-yan/dietaryindex_py_web.git
 cd dietaryindex_py
 pip install -e .
 ```
 
-#### Option 3: Docker (Run Streamlit App)
+### 方式二：安装可选能力
 
 ```bash
-docker compose up --build
-```
-Once started, visit `http://localhost:8501`.
+# NHANES / SAS / XPT 读取
+pip install -e .[adapters]
 
----
+# FastAPI + 上传接口
+pip install -e .[api]
 
-### 📖 Quick Start
-
-#### Core Computation (Any Data Source)
-
-```python
-import pandas as pd
-from dietaryindex import compute_hei2020
-
-# Load your prepared dietary data
-df = pd.read_csv("my_diet_data.csv")
-
-result = compute_hei2020(
-    data=df,
-    respondent_id=df["ID"].values,
-    age=df["AGE"].values,
-    total_kcal=df["KCAL"].values,
-    total_fruit=df["FRUIT"].values,
-    whole_fruit=df["WHOLE_FRUIT"].values,
-    total_vegetable=df["VEG"].values,
-    greens_and_beans=df["GREENS"].values,
-    whole_grains=df["WGRAIN"].values,
-    dairy=df["DAIRY"].values,
-    total_protein=df["PROTEIN"].values,
-    seafood_plant_protein=df["SEAFOOD"].values,
-    fatty_acids=df["FA_RATIO"].values,
-    refined_grains=df["RGRAIN"].values,
-    sodium=df["SODIUM"].values,
-    added_sugars=df["SUGAR"].values,
-    saturated_fat=df["SFAT"].values,
-)
-
-print(result.head())
+# 全部能力
+pip install -e .[all]
 ```
 
-#### NHANES FPED Adapter (2005+, One-Step Calculation)
+Windows 本地一键启动入口：
 
-```python
-from dietaryindex import compute_hei2020_nhanes_fped
+- `scripts/install_local.bat`
+- `scripts/start_desktop_launcher.bat`
+- `scripts/start_local_api.bat`
+- `scripts/start_lan_api.bat`
 
-result = compute_hei2020_nhanes_fped(
-    fped_path="fped_dr1tot_1718.sas7bdat",
-    nutrient_path="DR1TOT_J.XPT",
-    demo_path="DEMO_J.XPT",
-)
-```
+Windows 安装包还会自动配置 Codex MCP：安装完成后，程序会将内置的
+`DietaryIndexMCP.exe` 注册为名为 `dietaryindex` 的 STDIO MCP 服务。首次安装后请
+完全退出并重新打开 Codex GUI。若 Codex 当时未安装或不在 PATH 中，可稍后从开始菜单
+运行“配置 DietaryIndex MCP”；注册日志位于 `%LOCALAPPDATA%\DietaryIndex\mcp-registration.log`。安装器默认只允许 MCP 读取当前用户目录，并将结果写入 `%LOCALAPPDATA%\DietaryIndex\runtime_data\mcp_results`。如数据位于其他磁盘，可用 `register_codex_mcp.ps1 -AllowedRoot 'E:\data'` 重新注册；多个目录可传入数组。
 
-#### ASA24 / DHQ3 / BLOCK FFQ Adapters
+### 方式三：未来发布到 PyPI 后
 
-```python
-from dietaryindex import compute_dii_asa24, compute_dii_dhq3, compute_dii_block
-
-# ASA24 Totals.csv
-result = compute_dii_asa24("Totals.csv")
-
-# DHQ3 Total Daily Results
-result = compute_dii_dhq3("results.csv")
-
-# BLOCK FFQ raw data
-result = compute_dii_block("block_data.csv")
-```
-
----
-
-### 🧪 Streamlit Web Interface
-
-Run the local web application:
+下面这组命令是未来正式发布到 PyPI 后的目标用法；如果当前尚未发布，请继续使用源码安装：
 
 ```bash
-pip install dietaryindex[streamlit]
-cd streamlit_app
-python -m streamlit run app.py
-```
-Open `http://localhost:8501` in your browser to upload data, map columns, view interactive plots, and export results.
-
----
-
-### 📁 Data Source Support
-
-| Data Source | Mode | File Format | API |
-|-------------|------|-------------|-----|
-| **Generic** | Column Mapping | CSV / Excel | `compute_xxx(data, ...)` |
-| **NHANES FPED** (2005+) | Auto-parsed | .sas7bdat + .XPT | `compute_xxx_nhanes_fped(...)` |
-| **NHANES MPED** (1999–2004) | Auto-parsed | equiv.txt + .XPT | `compute_xxx_nhanes_mped(...)` |
-| **ASA24** | Auto-summarized | Totals.csv | `compute_dii_asa24(...)` |
-| **DHQ3** | One-step | detail.csv | `compute_xxx_dhq3(...)` |
-| **BLOCK FFQ** | One-step | CSV | `compute_xxx_block(...)` |
-
----
-
-## 中文说明
-
-**纯 Python 实现的 dietaryindex 膳食指数计算包**，完整复现 [dietaryindex R 包](https://github.com/jamesjiadazhan/dietaryindex) (James J. Zhan) 的全部 12 个国际通用膳食质量评估指数。
-
-### 📊 支持的膳食指数
-
-| 指数 | 英文名 | 组分 | 总分 |
-|------|--------|:---:|:----:|
-| 🔥 **DII** | Dietary Inflammatory Index | 45 | 无上限 |
-| 📊 **HEI-2020** | Healthy Eating Index 2020 | 13 | 0–100 |
-| 📊 **HEI-2015** | Healthy Eating Index 2015 | 13 | 0–100 |
-| 🫀 **AHEI** | Alternative Healthy Eating Index | 11 | 0–110 |
-| 🤰 **AHEIP** | AHEI Pregnancy | 9 | 0–90 |
-| 💚 **DASH** | DASH Diet Score | 8 | 8–40 |
-| ❤️ **DASHI** | DASH Nutrient Density | 9 | 0–9 |
-| 🫒 **MED** | Mediterranean Diet Index | 9 | 0–9 |
-| 🐟 **MEDI** | MEDI (PREDIMED) | 11 | 0–11 |
-| 🎗️ **ACS2020** | ACS Cancer Prevention | 8 | 0–15 |
-| 🌍 **PHDI** | Planetary Health Diet Index | 16 | 0–150 |
-| 🦠 **DI-GM** | Dietary Index for Gut Microbiota | 14 | 0–14 |
-
----
-
-### 🚀 安装
-
-#### 方式一：PyPI（推荐）
-
-```bash
-# 仅核心计算（numpy + pandas + scipy）
 pip install dietaryindex
-
-# 含 NHANES 适配器（需要 pyreadstat 读取 SAS/XPT 文件）
-pip install dietaryindex[adapters]
-
-# 含 Streamlit Web 界面（plotly 图表 + Excel 导出）
-pip install dietaryindex[streamlit]
-
-# 全部安装
+pip install dietaryindex[api]
 pip install dietaryindex[all]
 ```
 
-#### 方式二：从源码安装
-
-```bash
-git clone https://github.com/zhiwen-yan/dietaryindex_py.git
-cd dietaryindex_py
-pip install -e .
-```
-
-#### 方式三：Docker 运行 Streamlit
-
-```bash
-docker compose up --build
-```
-启动后访问 `http://localhost:8501`。
-
 ---
 
-### 📖 快速开始
+## 快速开始
 
-#### 核心计算（任何数据源）
+### Python 包：统一服务层
 
 ```python
-import pandas as pd
-from dietaryindex import compute_hei2020
+from dietaryindex import preview_file, suggest_mapping, run_compute
 
-# 读取已整理好的膳食数据
-df = pd.read_csv("my_diet_data.csv")
+preview = preview_file("data.csv")
+mapping_info = suggest_mapping("HEI2020", preview["columns"])
 
-result = compute_hei2020(
-    data=df,
-    respondent_id=df["ID"].values,
-    age=df["AGE"].values,
-    total_kcal=df["KCAL"].values,
-    total_fruit=df["FRUIT"].values,
-    whole_fruit=df["WHOLE_FRUIT"].values,
-    total_vegetable=df["VEG"].values,
-    greens_and_beans=df["GREENS"].values,
-    whole_grains=df["WGRAIN"].values,
-    dairy=df["DAIRY"].values,
-    total_protein=df["PROTEIN"].values,
-    seafood_plant_protein=df["SEAFOOD"].values,
-    fatty_acids=df["FA_RATIO"].values,
-    refined_grains=df["RGRAIN"].values,
-    sodium=df["SODIUM"].values,
-    added_sugars=df["SUGAR"].values,
-    saturated_fat=df["SFAT"].values,
+mapping = {
+    key: value["column"]
+    for key, value in mapping_info["suggestions"].items()
+    if value["column"]
+}
+
+result = run_compute(
+    index_key="HEI2020",
+    mode="general",
+    file_path="data.csv",
+    mapping=mapping,
+    output_dir="results",
 )
 
-print(result.head())
+print(result["summary_stats"])
 ```
 
-#### NHANES FPED 适配器（2005 年后，一步式计算）
+### Python 包：专用模式
 
 ```python
-from dietaryindex import compute_hei2020_nhanes_fped
+from dietaryindex import run_compute
 
-result = compute_hei2020_nhanes_fped(
-    fped_path="fped_dr1tot_1718.sas7bdat",
-    nutrient_path="DR1TOT_J.XPT",
-    demo_path="DEMO_J.XPT",
+result = run_compute(
+    index_key="PHDI",
+    mode="nhanes_fped",
+    file_paths={
+        "fped_path": "fped_dr1tot.sas7bdat",
+        "nutrient_path": "DR1TOT_H.XPT",
+        "demo_path": "DEMO_H.XPT",
+    },
+    output_dir="results_phdi",
 )
 ```
 
-#### ASA24 / DHQ3 / BLOCK FFQ 适配器
-
-```python
-from dietaryindex import compute_dii_asa24, compute_dii_dhq3, compute_dii_block
-
-# ASA24 Totals.csv
-result = compute_dii_asa24("Totals.csv")
-
-# DHQ3 Total Daily Results
-result = compute_dii_dhq3("results.csv")
-
-# BLOCK FFQ 原始数据
-result = compute_dii_block("block_data.csv")
-```
-
----
-
-### 🧪 Streamlit Web 界面
-
-启动本地 Web 应用：
+### CLI
 
 ```bash
-pip install dietaryindex[streamlit]
-cd streamlit_app
-python -m streamlit run app.py
+dietaryindex-cli catalog
+dietaryindex-cli detail --index HEI2020
+dietaryindex-cli preview --input data.csv
+dietaryindex-cli suggest-mapping --index HEI2020 --input data.csv
+dietaryindex-cli compute --index HEI2020 --input data.csv --auto-map --output-dir results
+dietaryindex-cli compute --index PHDI --mode nhanes_fped --fped-path fped_dr1tot.sas7bdat --nutrient-path DR1TOT_H.XPT --demo-path DEMO_H.XPT
 ```
-浏览器自动打开 `http://localhost:8501`，即可在图形界面中上传数据、映射列名、查看图表并导出结果。
+
+### API
+
+启动：
+
+```bash
+uvicorn dietaryindex_api.app:app --host 127.0.0.1 --port 8000 --reload
+```
+
+接口文档：
+
+- Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- OpenAPI: [http://127.0.0.1:8000/openapi.json](http://127.0.0.1:8000/openapi.json)
+- Health check: [http://127.0.0.1:8000/healthz](http://127.0.0.1:8000/healthz)
 
 ---
 
-### 📁 数据源支持
+## Web 端启动
 
-| 数据源 | 模式 | 文件格式 | API |
-|--------|------|---------|-----|
-| **通用** | 列名映射 | CSV / Excel | `compute_xxx(data, ...)` |
-| **NHANES FPED** (2005+) | 自动解析 | .sas7bdat + .XPT | `compute_xxx_nhanes_fped(...)` |
-| **NHANES MPED** (1999–2004) | 自动解析 | equiv.txt + .XPT | `compute_xxx_nhanes_mped(...)` |
-| **ASA24** | 自动汇总 | Totals.csv | `compute_dii_asa24(...)` |
-| **DHQ3** | 一步式 | detail.csv | `compute_xxx_dhq3(...)` |
-| **BLOCK FFQ** | 一步式 | CSV | `compute_xxx_block(...)` |
+推荐使用 Docker Compose 同时启动正式网站和 API：
 
----
+```bash
+docker compose up --build -d
+```
 
-## 🔧 Dependencies / 依赖
+默认地址：
 
-| Package / 依赖包 | Required / 是否必需 | Usage / 用途 |
-|------------------|:-------------------:|--------------|
-| numpy ≥ 1.24 | ✅ | 数值计算 / Numerical computing |
-| pandas ≥ 2.0 | ✅ | 数据处理 / Data processing |
-| scipy ≥ 1.10 | ✅ | 统计函数 / Statistical functions |
-| pyreadstat ≥ 1.2 | ❌ | SAS/XPT 文件读取 / Reading SAS/XPT files (NHANES) |
-| streamlit ≥ 1.28 | ❌ | Web 界面 / Web interface |
-| plotly ≥ 5.18 | ❌ | 图表可视化 / Data visualization |
-| openpyxl ≥ 3.1 | ❌ | Excel 导出 / Excel export |
+- Next.js 正式网站: [http://127.0.0.1:3003](http://127.0.0.1:3003)
+- FastAPI 文档: [http://127.0.0.1:8001/docs](http://127.0.0.1:8001/docs)
+
+端口、API 密钥、上传大小和日志级别均可通过 `.env` 配置，参考 `.env.example`。
 
 ---
 
-## 📚 References / 参考文献
+## API 能力范围
 
-1. Shivappa N, et al. "Designing and developing a literature-derived, population-based dietary inflammatory index." *Public Health Nutrition*, 2014.
-2. Krebs-Smith SM, et al. "Update of the Healthy Eating Index: HEI-2015." *J Acad Nutr Diet*, 2018.
-3. Chiuve SE, et al. "Alternative dietary indices both strongly predict risk of chronic disease." *J Nutr*, 2012.
-4. Fung TT, et al. "Adherence to a DASH-style diet and risk of coronary heart disease and stroke." *Arch Intern Med*, 2008.
-5. Trichopoulou A, et al. "Adherence to a Mediterranean diet and survival in a Greek population." *N Engl J Med*, 2003.
-6. Cacau LT, et al. "Development and Validation of an Index Based on EAT-Lancet Recommendations." *J Nutr*, 2021.
-7. Kase BE, et al. "Development and evaluation of a dietary index assessing diet-gut microbiome interactions." *J Nutr*, 2023.
+当前 API MVP 主要覆盖：
+
+- `GET /v1/indices`
+- `GET /v1/indices/{index_key}`
+- `POST /v1/uploads`
+- `GET /v1/uploads/{upload_id}/preview`
+- `POST /v1/mapping/suggest`
+- `POST /v1/mapping/validate`
+- `POST /v1/compute`
+- `GET /v1/jobs/{job_id}`
+- `GET /v1/jobs/{job_id}/download?format=csv|xlsx`
+- `GET /v1/fii/summary`
+- `GET /v1/fii/search`
+- `GET /v1/fii/foods/{fdcd}`
+
+这套接口已经足够支持：
+
+- 未来正式网页前后端分离
+- 外部系统调用
+- Codex / AI agent 自动上传和计算
+- 本地批处理与自动报告流程
 
 ---
 
-## 📄 License / 协议
+## FII 数据库说明
 
-MIT License. Based on the [dietaryindex R package](https://github.com/jamesjiadazhan/dietaryindex).
+项目现在已经包含一个可检索的 FII 数据库页面，当前以美国 USDA / FNDDS 数据为基础。
+
+适合做的事情：
+
+- 按英文食物名称查询 apple、banana、yogurt、coffee 等食物的 FII
+- 按 8 位 FDCD 编码精确查询
+- 比较同类食物的相对炎症潜力
+- 作为 FISI 工作流的食物级支撑层
+
+后续可扩展方向：
+
+- 增加中国食物成分表版本
+- 增加中文食物名称、同义词和别名检索（当前版本尚不支持）
+- 增加人群常见食品专题页
+- 增加图形化对比和下载接口
+
+---
+
+## 文档
+
+更完整的文档见：
+
+- [接入方式说明](./docs/ACCESS_GUIDE.md)
+- [学术引用说明](./docs/CITATION_GUIDE.md)
+- [部署说明](./docs/DEPLOYMENT_GUIDE.md)
+- [2026-09-11 计算准确性与 NHANES 配对样本审计](./docs/ACCURACY_AUDIT_2026-09-11.md)
+- [发布与分发说明](./docs/RELEASE_PLAN.md)
+- [正式上线前检查清单](./docs/PRELAUNCH_CHECKLIST.md)
+
+---
+
+## 部署建议
+
+当前采用三层架构：
+
+1. Next.js 正式前端
+用于首页、FII 数据库、统一计算工作台和后续正式网站体验。
+
+2. FastAPI 后端
+用于指数目录、上传、映射、计算任务、结果下载和外部系统集成。
+
+3. Python 核心计算包
+作为 API、CLI、MCP 和本地研究工作流的唯一计算事实来源。
+
+正式公网部署时建议：
+
+- 前端：Next.js 独立容器
+- 后端：FastAPI + Uvicorn，耗时任务再迁移到持久化队列
+- 数据与结果目录：独立持久化卷
+- 域名层：HTTPS + 反向代理
+
+---
+
+## 参考文献
+
+1. Shivappa N, et al. Designing and developing a literature-derived, population-based dietary inflammatory index. *Public Health Nutrition*, 2014.
+2. Krebs-Smith SM, et al. Update of the Healthy Eating Index: HEI-2015. *Journal of the Academy of Nutrition and Dietetics*, 2018.
+3. Chiuve SE, et al. Alternative dietary indices both strongly predict risk of chronic disease. *Journal of Nutrition*, 2012.
+4. Fung TT, et al. Adherence to a DASH-style diet and risk of coronary heart disease and stroke. *Archives of Internal Medicine*, 2008.
+5. Trichopoulou A, et al. Adherence to a Mediterranean diet and survival in a Greek population. *New England Journal of Medicine*, 2003.
+6. Cacau LT, et al. Development and validation of an index based on EAT-Lancet recommendations. *Journal of Nutrition*, 2021.
+7. Kase BE, et al. Development and evaluation of a dietary index assessing diet-gut microbiome interactions. *Journal of Nutrition*, 2023.
+
+---
+
+## License
+
+This repository is licensed under `AGPL-3.0-or-later`.
+
+学术引用、致谢建议和待发表论文的更新方式见：
+
+- [CITATION.cff](./CITATION.cff)
+- [NOTICE](./NOTICE)
+- [docs/CITATION_GUIDE.md](./docs/CITATION_GUIDE.md)
+
+本项目建立在原始 [dietaryindex R 包](https://github.com/jamesjiadazhan/dietaryindex) 的研究思路与实现经验之上，并继续向 Python 包、网页平台、API 平台和数据库平台扩展。

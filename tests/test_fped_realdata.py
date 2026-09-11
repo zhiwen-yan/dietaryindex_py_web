@@ -1,11 +1,14 @@
 """测试 NHANES 2017-2018 FPED 真实数据"""
 import sys
-sys.path.insert(0, r"E:\BaiduSyncdisk\yanzhiwen\R shiny 网站\网站设计\dietaryindex_py")
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT / "dietaryindex_py"))
 
 import os
 import time
 
-DATA_DIR = r"E:\BaiduSyncdisk\yanzhiwen\R shiny 网站\网站设计\NHANES\2017-2018"
+DATA_DIR = str(PROJECT_ROOT / "NHANES" / "2017-2018")
 
 FPED_PATH = os.path.join(DATA_DIR, "Dietary", "fped_dr1tot_1718.sas7bdat")
 FPED_PATH2 = os.path.join(DATA_DIR, "Dietary", "fped_dr2tot_1718.sas7bdat")

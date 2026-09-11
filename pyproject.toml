@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dietaryindex"
-version = "0.1.0"
-description = "Python implementation of the dietaryindex R package — compute 12 dietary quality indices from NHANES, ASA24, DHQ3, and BLOCK FFQ data"
+version = "0.3.0"
+description = "Dietary index calculation engine and Windows desktop application"
 readme = "README.md"
-requires-python = ">=3.9"
-license = {text = "MIT"}
+requires-python = ">=3.10"
+license = {text = "GNU Affero General Public License v3 or later (AGPL-3.0-or-later)"}
 authors = [
     {name = "Dietary Index Team"}
 ]
@@ -29,9 +29,8 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Healthcare Industry",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -41,32 +40,56 @@ classifiers = [
 dependencies = [
     "numpy>=1.24.0",
     "pandas>=2.0.0",
-    "scipy>=1.10.0",
-    "shap"
+    "scipy>=1.10.0"
 ]
 
 [project.optional-dependencies]
 adapters = [
     "pyreadstat>=1.2.0",
 ]
-streamlit = [
-    "streamlit>=1.28.0",
+api = [
+    "fastapi>=0.111.0",
+    "uvicorn>=0.30.0",
+    "python-multipart>=0.0.9",
     "openpyxl>=3.1.0",
     "xlrd>=2.0.0",
-    "plotly>=5.18.0",
+    "pyreadstat>=1.2.0",
+]
+desktop = [
+    "mcp>=2.0,<3",
+]
+legacy-desktop = [
+    "pywebview>=5.4",
+    "psutil>=5.9",
+]
+dev = [
+    "pytest>=8,<10",
+    "httpx2>=2.5,<3",
 ]
 all = [
+    "fastapi>=0.111.0",
+    "uvicorn>=0.30.0",
+    "python-multipart>=0.0.9",
     "pyreadstat>=1.2.0",
-    "streamlit>=1.28.0",
     "openpyxl>=3.1.0",
     "xlrd>=2.0.0",
-    "plotly>=5.18.0",
+    "mcp>=2.0,<3",
 ]
 
 [project.urls]
-Homepage = "https://github.com/jamesjiadazhan/dietaryindex"
-Repository = "https://github.com/jamesjiadazhan/dietaryindex"
-Documentation = "https://github.com/jamesjiadazhan/dietaryindex/blob/main/README.md"
+Homepage = "https://dietaryindex.org"
+Repository = "https://github.com/zhiwen-yan/dietaryindex_py_web"
+Documentation = "https://github.com/zhiwen-yan/dietaryindex_py_web/blob/main/README.md"
+
+[project.scripts]
+dietaryindex-cli = "dietaryindex.cli:main"
+dietaryindex-mcp = "dietaryindex.mcp_server:main"
 
 [tool.setuptools.packages.find]
 include = ["dietaryindex*"]
+
+[tool.setuptools.package-data]
+dietaryindex = ["data/*.csv"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

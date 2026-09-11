@@ -1,0 +1,1 @@
+"""FastAPI package for dietaryindex."""

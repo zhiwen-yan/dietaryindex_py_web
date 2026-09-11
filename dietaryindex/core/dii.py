@@ -145,12 +145,14 @@ def compute_dii(
     merged["PERCENTILE"] = norm.cdf(merged["Z_SCORE"]) * 2 - 1
     merged["IND_DII_SCORE"] = merged["PERCENTILE"] * merged["Overall_inflammatory_score"]
 
+    base_rows = long_df[id_vars].drop_duplicates().reset_index(drop=True)
     wide = merged.pivot_table(
         index=["RESPONDENTID", "REPEATNUM"],
         columns="Variable",
         values="IND_DII_SCORE",
-        aggfunc="sum"
+        aggfunc=lambda s: s.sum(min_count=1),
     ).reset_index()
+    wide = base_rows.merge(wide, on=id_vars, how="left")
 
     for key in component_keys:
         if key not in wide.columns:
@@ -161,18 +163,23 @@ def compute_dii(
         if c in wide.columns and wide[c].notna().any()
     ]
 
-    wide["DII_ALL"] = wide[available_components].sum(axis=1)
-
-    no_etoh_components = [c for c in available_components if c != "ALCOHOL"]
-    wide["DII_NOETOH"] = wide[no_etoh_components].sum(axis=1) if no_etoh_components else 0.0
+    if available_components:
+        wide["Components_Used"] = wide[available_components].notna().sum(axis=1)
+        wide["DII_ALL"] = wide[available_components].sum(axis=1, min_count=1)
+        no_etoh_components = [c for c in available_components if c != "ALCOHOL"]
+        wide["DII_NOETOH"] = wide[no_etoh_components].sum(axis=1, min_count=1) if no_etoh_components else np.nan
+    else:
+        wide["Components_Used"] = 0
+        wide["DII_ALL"] = np.nan
+        wide["DII_NOETOH"] = np.nan
 
     for key in component_keys:
         if key not in kwargs or kwargs[key] is None:
             wide[key] = 0.0
         else:
-            wide[key] = wide[key].fillna(0.0)
+            wide[key] = pd.to_numeric(wide[key], errors="coerce")
 
-    output_cols = ["RESPONDENTID", "DII_ALL", "DII_NOETOH", "REPEATNUM"]
+    output_cols = ["RESPONDENTID", "DII_ALL", "DII_NOETOH", "Components_Used", "REPEATNUM"]
     for key in component_keys:
         if key in wide.columns:
             output_cols.append(key)
@@ -181,7 +188,7 @@ def compute_dii(
     result = result.reset_index(drop=True)
 
     for col in result.columns:
-        if col not in ["RESPONDENTID", "REPEATNUM"]:
-            result[col] = pd.to_numeric(result[col], errors="coerce").fillna(0.0)
+        if col not in ["RESPONDENTID", "REPEATNUM", "DII_ALL", "DII_NOETOH", "Components_Used"]:
+            result[col] = pd.to_numeric(result[col], errors="coerce")
 
     return result

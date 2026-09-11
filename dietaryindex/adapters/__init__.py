@@ -11,6 +11,13 @@ from dietaryindex.adapters.nhanes_fped_ind import (
     compute_medi_nhanes_fped,
     compute_di_gm_nhanes_fped,
 )
+from dietaryindex.adapters.phdi import (
+    compute_phdi_nhanes_fped,
+    compute_phdi_nhanes_mped,
+    compute_phdi_asa24,
+    compute_phdi_dhq3,
+    compute_phdi_block,
+)
 from dietaryindex.adapters.nhanes_mped import compute_dii_nhanes_mped
 from dietaryindex.adapters.nhanes_mped_other import (
     compute_hei2015_nhanes_mped,
@@ -36,6 +43,11 @@ __all__ = [
     "compute_ahei_nhanes_fped",
     "compute_medi_nhanes_fped",
     "compute_di_gm_nhanes_fped",
+    "compute_phdi_nhanes_fped",
+    "compute_phdi_nhanes_mped",
+    "compute_phdi_asa24",
+    "compute_phdi_dhq3",
+    "compute_phdi_block",
     "compute_dii_nhanes_mped",
     "compute_hei2015_nhanes_mped",
     "compute_hei2020_nhanes_mped",

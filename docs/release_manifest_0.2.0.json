@@ -1,0 +1,40 @@
+{
+  "version": "0.2.0",
+  "build_date": "2026-08-09",
+  "environment": {
+    "python": "3.12.10",
+    "mcp": "1.29.0",
+    "fastapi": "0.141.1",
+    "nextjs": "16.3.0"
+  },
+  "checks": {
+    "pytest": {"passed": 89, "failed": 0, "warnings": 1},
+    "base_registry_entries": 32,
+    "api_catalog_entries": 40,
+    "cli_catalog_entries": 40,
+    "catalog_entries_with_score_scale": 40,
+    "source_interface_smoke": "PASS",
+    "frontend_typecheck": "PASS",
+    "npm_high_severity_vulnerabilities": 0,
+    "packaged_desktop_smoke": "PASS",
+    "packaged_mcp_tools": 7,
+    "packaged_mcp_smoke": "PASS"
+  },
+  "artifacts": [
+    {
+      "path": "dist/DietaryIndexLocal/DietaryIndexLocal.exe",
+      "bytes": 160628542,
+      "sha256": "F560C3DC2D9E43321125951E5840328F992235BCEA76F8C6A18093E5511D410A"
+    },
+    {
+      "path": "dist/DietaryIndexMCP.exe",
+      "bytes": 110621291,
+      "sha256": "7E2A30D9697F536F2D47F9741C2D1CDBD5475D760B24BA97243E26FC172B4DCB"
+    },
+    {
+      "path": "dist/installer/DietaryIndexLocalSetup-0.2.0.exe",
+      "bytes": 358089637,
+      "sha256": "AAA85E92690289379CDD9FD1AF052F3097E052E41D34435EAFA35F3A13DB2954"
+    }
+  ]
+}

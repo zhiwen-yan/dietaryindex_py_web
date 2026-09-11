@@ -1,26 +1,14 @@
 """
 综合测试所有 12 个膳食指数算法
 """
-import sys
-sys.path.insert(0, r"e:\BaiduSyncdisk\yanzhiwen\R shiny 网站\网站设计\dietaryindex_py")
-
 import pandas as pd
 import numpy as np
 import traceback
 
-TESTS_PASSED = 0
-TESTS_FAILED = 0
-
-def test(name):
+def case(name):
     def decorator(fn):
-        global TESTS_PASSED, TESTS_FAILED
-        try:
-            fn()
-            TESTS_PASSED += 1
-            print(f"  [PASS] {name}")
-        except Exception as e:
-            TESTS_FAILED += 1
-            print(f"  [FAIL] {name}: {e}")
+        fn.case_name = name
+        return fn
     return decorator
 
 # 共享测试数据
@@ -81,7 +69,7 @@ df = pd.DataFrame({
 })
 
 ###############################################################################
-@test("DII - 基本功能")
+@case("DII - 基本功能")
 def test_dii():
     from dietaryindex import compute_dii
     r = compute_dii(
@@ -95,7 +83,7 @@ def test_dii():
     assert 'DII_NOETOH' in r.columns
     assert len(r) == n
 
-@test("HEI2015 - 基本功能")
+@case("HEI2015 - 基本功能")
 def test_hei2015():
     from dietaryindex import compute_hei2015
     r = compute_hei2015(
@@ -120,7 +108,7 @@ def test_hei2015():
     assert len(r) == n
     assert r['HEI2015_ALL'].between(0, 100).all()
 
-@test("HEI2020 - 基本功能")
+@case("HEI2020 - 基本功能")
 def test_hei2020():
     from dietaryindex import compute_hei2020
     r = compute_hei2020(
@@ -146,7 +134,7 @@ def test_hei2020():
     assert len(r) == n
     assert r['HEI2020_ALL'].between(0, 100).all()
 
-@test("HEI2020_V2 - 基本功能")
+@case("HEI2020_V2 - 基本功能")
 def test_hei2020_v2():
     from dietaryindex import compute_hei2020_v2
     r = compute_hei2020_v2(
@@ -170,7 +158,7 @@ def test_hei2020_v2():
     )
     assert 'HEI2020_ALL' in r.columns
 
-@test("AHEI - 基本功能")
+@case("AHEI - 基本功能")
 def test_ahei():
     from dietaryindex import compute_ahei
     r = compute_ahei(
@@ -194,7 +182,7 @@ def test_ahei():
     assert 'AHEI_NOETOH' in r.columns
     assert len(r) == n
 
-@test("AHEIP - 基本功能")
+@case("AHEIP - 基本功能")
 def test_aheip():
     from dietaryindex import compute_aheip
     r = compute_aheip(
@@ -212,7 +200,7 @@ def test_aheip():
     )
     assert 'AHEIP_ALL' in r.columns
 
-@test("DASH - 基本功能")
+@case("DASH - 基本功能")
 def test_dash():
     from dietaryindex import compute_dash
     r = compute_dash(
@@ -231,7 +219,7 @@ def test_dash():
     assert 'DASH_ALL' in r.columns
     assert r['DASH_ALL'].between(8, 40).all()
 
-@test("DASHI - 基本功能")
+@case("DASHI - 基本功能")
 def test_dashi():
     from dietaryindex import compute_dashi
     r = compute_dashi(
@@ -250,7 +238,7 @@ def test_dashi():
     )
     assert 'DASHI_ALL' in r.columns
 
-@test("MED - 基本功能")
+@case("MED - 基本功能")
 def test_med():
     from dietaryindex import compute_med
     r = compute_med(
@@ -269,7 +257,7 @@ def test_med():
     assert 'MED_ALL' in r.columns
     assert 'MED_NOETOH' in r.columns
 
-@test("MEDI - 基本功能")
+@case("MEDI - 基本功能")
 def test_medi():
     from dietaryindex import compute_medi
     r = compute_medi(
@@ -289,7 +277,7 @@ def test_medi():
     )
     assert 'MEDI_ALL' in r.columns
 
-@test("MEDI_V2 - 基本功能")
+@case("MEDI_V2 - 基本功能")
 def test_medi_v2():
     from dietaryindex import compute_medi_v2
     r = compute_medi_v2(
@@ -309,7 +297,7 @@ def test_medi_v2():
     )
     assert 'MEDI_V2_ALL' in r.columns
 
-@test("ACS2020_V1 - 基本功能")
+@case("ACS2020_V1 - 基本功能")
 def test_acs2020_v1():
     from dietaryindex import compute_acs2020_v1
     r = compute_acs2020_v1(
@@ -327,7 +315,7 @@ def test_acs2020_v1():
     )
     assert 'ACS2020_V1_ALL' in r.columns
 
-@test("ACS2020_V2 - 基本功能")
+@case("ACS2020_V2 - 基本功能")
 def test_acs2020_v2():
     from dietaryindex import compute_acs2020_v2
     r = compute_acs2020_v2(
@@ -347,7 +335,7 @@ def test_acs2020_v2():
     assert 'ACS2020_V2_ALL' in r.columns
     assert 'TOTALKCAL_ACS2020' in r.columns
 
-@test("PHDI - 基本功能")
+@case("PHDI - 基本功能")
 def test_phdi():
     from dietaryindex import compute_phdi
     r = compute_phdi(
@@ -373,7 +361,7 @@ def test_phdi():
     )
     assert 'PHDI_ALL' in r.columns
 
-@test("PHDI_V2 - 基本功能")
+@case("PHDI_V2 - 基本功能")
 def test_phdi_v2():
     from dietaryindex import compute_phdi_v2
     r = compute_phdi_v2(
@@ -399,7 +387,7 @@ def test_phdi_v2():
     )
     assert 'PHDI_ALL' in r.columns
 
-@test("DI_GM - 基本功能")
+@case("DI_GM - 基本功能")
 def test_di_gm():
     from dietaryindex import compute_di_gm
     r = compute_di_gm(
@@ -424,26 +412,16 @@ def test_di_gm():
     assert 'DI_GM_TOTAL' in r.columns
     assert r['DI_GM_TOTAL'].between(0, 14).all()
 
-@test("导入测试 - 检查所有公开API")
+@case("导入测试 - 检查所有公开API")
 def test_imports():
     import dietaryindex
     expected = [
         'compute_dii', 'compute_hei2015', 'compute_hei2020', 'compute_hei2020_v2',
         'compute_ahei', 'compute_aheip', 'compute_dash', 'compute_dashi',
         'compute_med', 'compute_medi', 'compute_acs2020_v1', 'compute_acs2020_v2',
-        'compute_phdi', 'compute_phdi_v2', 'compute_di_gm',
+        'compute_phdi', 'compute_phdi_v2', 'compute_phdi_nhanes_fped', 'compute_phdi_nhanes_mped',
+        'compute_phdi_asa24', 'compute_phdi_dhq3', 'compute_phdi_block', 'compute_di_gm',
     ]
     for name in expected:
         fn = getattr(dietaryindex, name)
         assert callable(fn), f"{name} is not callable"
-
-print("=" * 60)
-print("dietaryindex Python 包 - 综合测试")
-print(f"测试 {n} 个样本的合成数据")
-print("=" * 60)
-
-# 测试用例由装饰器自动注册运行
-
-print(f"\n{'='*60}")
-print(f"结果: {TESTS_PASSED} 通过, {TESTS_FAILED} 失败, 共 {TESTS_PASSED+TESTS_FAILED} 项")
-print(f"{'='*60}")

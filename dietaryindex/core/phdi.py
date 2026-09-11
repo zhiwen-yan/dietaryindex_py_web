@@ -2,7 +2,7 @@
 PHDI - Planetary Health Diet Index
 
 精确翻译自 dietaryindex R 包 PHDI.R 源码。
-总分范围: 0-150 (15个组分)，基于 EAT-Lancet 报告。
+总分范围: 0-140 (15个组分；豆类和大豆各最高5分)，基于 EAT-Lancet 报告。
 """
 
 import numpy as np
@@ -166,4 +166,3 @@ def compute_phdi_v2(
         added_fat_sat_trans=afs_pct,
         added_sugar=asug_pct,
     )
-

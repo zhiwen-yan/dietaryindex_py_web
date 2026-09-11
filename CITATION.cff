@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software in academic work, cite this software release and
+  the original methodological sources for the dietary indices you compute.
+title: "DietaryIndex-Py"
+type: software
+license: "AGPL-3.0-or-later"
+authors:
+  - family-names: "Yan"
+    given-names: "Zhiwen"
+    email: "zhiwen-yan@foxmail.com"
+repository-code: "https://github.com/zhiwen-yan/dietaryindex_py_web"
+url: "https://dietaryindex.org"
+abstract: >-
+  Python platform for dietary index computation, a Next.js desktop and web
+  interface, API-based integration, and FII/FISI food database lookup.
+keywords:
+  - nutrition
+  - dietary index
+  - epidemiology
+  - nextjs
+  - fastapi
+version: "0.3.0"
+date-released: 2026-08-24

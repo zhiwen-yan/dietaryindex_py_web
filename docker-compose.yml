@@ -1,12 +1,57 @@
+x-python-service: &python-service
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: dietaryindex-python:local
+  restart: unless-stopped
+  environment:
+    DIETARYINDEX_RUNTIME_DIR: /app/runtime_data
+    DIETARYINDEX_API_KEY: ${DIETARYINDEX_API_KEY:-}
+    DIETARYINDEX_REQUIRE_API_KEY: ${DIETARYINDEX_REQUIRE_API_KEY:-false}
+    DIETARYINDEX_MAX_UPLOAD_MB: ${DIETARYINDEX_MAX_UPLOAD_MB:-100}
+    DIETARYINDEX_LOG_LEVEL: ${DIETARYINDEX_LOG_LEVEL:-INFO}
+  volumes:
+    - dietaryindex-runtime:/app/runtime_data
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
-  dietaryindex-web:
-    build:
-      context: .
-    restart: unless-stopped
+  dietaryindex-api:
+    <<: *python-service
+    command: uvicorn dietaryindex_api.app:app --host 0.0.0.0 --port 8000
+    working_dir: /app
     ports:
-      - "127.0.0.1:8501:8501"
-    volumes:
-      - ./dietaryindex:/app/dietaryindex
-      - ./streamlit_app:/app/streamlit_app
-      - ./tests:/app/tests
-      - ../NHANES:/app/NHANES
+      - "127.0.0.1:${DIETARYINDEX_API_PORT:-8001}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 15s
+
+  dietaryindex-site:
+    build:
+      context: ./web_frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DIETARYINDEX_API_INTERNAL_URL: http://dietaryindex-api:8000
+      DIETARYINDEX_API_KEY: ${DIETARYINDEX_API_KEY:-}
+    ports:
+      # Public site only: allow devices on the local network to reach Next.js.
+      # Keep the API binding loopback-only above.
+      - "0.0.0.0:${DIETARYINDEX_SITE_PORT:-3003}:3000"
+    depends_on:
+      dietaryindex-api:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  dietaryindex-runtime:

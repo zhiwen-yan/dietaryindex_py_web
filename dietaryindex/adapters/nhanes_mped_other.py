@@ -311,11 +311,15 @@ def _process_ind_foods(nutrient_ind, equiv_processed, wjfrt_df=None):
             nut_cols["ALCOHOL"] = ind[ncol].values
         if ncol in ("DR1IKCAL", "DRXIKCAL"):
             nut_cols["TOTALKCAL"] = ind[ncol].values
+        if ncol in ("DR1IFIBE", "DRXIFIBE"):
+            nut_cols["FIBER"] = ind[ncol].values
+        if ncol in ("DR1ITFAT", "DRXITFAT"):
+            nut_cols["TOTALFAT"] = ind[ncol].values
 
     if nut_cols:
         nut_grp = ind[["SEQN"]].copy()
         for name, vals in nut_cols.items():
-            nut_grp[name] = pd.to_numeric(vals, errors="coerce").fillna(0.0)
+            nut_grp[name] = pd.Series(pd.to_numeric(vals, errors="coerce"), index=nut_grp.index).fillna(0.0)
         nut_sum = nut_grp.groupby("SEQN", as_index=False).sum()
         for name in nut_cols:
             n_df[name] = nut_sum[name].values
@@ -1209,11 +1213,16 @@ def compute_di_gm_nhanes_mped(
     fermented_dairy_code=None,
     green_tea_code=None,
     soybean_code=None,
+    two_day_method="intake_average",
 ):
     """Compute DI_GM from NHANES MPED data (1999-2004).
 
     Identifies 8 special food types by FNDDS food code.
     Uses sex-specific median ranking via core compute_di_gm.
+
+    two_day_method:
+      - "intake_average" (default): average Day 1/Day 2 component intakes, then score.
+      - "score_average": score each day first, then average scores (R package parity).
     """
     if avocado_code is None:
         avocado_code = _DIGM_MPED_AVOCADO
@@ -1277,59 +1286,100 @@ def compute_di_gm_nhanes_mped(
             ]
             for name, codes in special_foods:
                 mask = nt_ind[food_col].isin(codes)
-                nt_ind[f"_{name}"] = np.where(mask, grams, 0.0)
-                spec_sum = nt_ind[mask].groupby("SEQN", as_index=False)[f"_{name}"].sum()
+                nt_ind[name] = np.where(mask, grams, 0.0)
+                spec_sum = nt_ind[mask].groupby("SEQN", as_index=False)[name].sum()
                 if not spec_sum.empty:
                     result = result.merge(spec_sum, on="SEQN", how="left").fillna(0)
-                if f"_{name}" not in result.columns:
-                    result[f"_{name}"] = 0.0
+                if name not in result.columns:
+                    result[name] = 0.0
 
         return result
 
-    day1 = _process_day(nutrient_ind_path)
-    day2 = _process_day(nutrient_ind_path2) if nutrient_ind_path2 is not None else None
-    merged = _merge_day1_day2(day1, day2)
-
-    if merged is None:
-        raise ValueError("No data after processing")
-
-    for col in ["AVOCADO_SERV", "BROCCOLI_SERV", "CHICKPEA_SERV", "COFFEE_SERV",
-                "CRANBERRY_SERV", "FERMENTED_DAIRY_SERV", "GREEN_TEA_SERV", "SOYBEAN_SERV"]:
-        if col not in merged.columns:
-            merged[col] = 0.0
-
-    gender = pd.Series(2, index=merged.index)
     demo_df = None
     if demo_path is not None:
         demo_df = _resolve_mped_upload(demo_path)
-        if demo_df is not None and "RIAGENDR" in demo_df.columns:
+        if demo_df is not None and "SEQN" in demo_df.columns:
+            demo_df = demo_df.copy()
             demo_df["SEQN"] = demo_df["SEQN"].astype(int)
+
+    def _score_day(day_summary):
+        if day_summary is None or day_summary.empty:
+            return None
+
+        merged = day_summary.copy()
+        for col in ["AVOCADO_SERV", "BROCCOLI_SERV", "CHICKPEA_SERV", "COFFEE_SERV",
+                    "CRANBERRY_SERV", "FERMENTED_DAIRY_SERV", "GREEN_TEA_SERV", "SOYBEAN_SERV"]:
+            if col not in merged.columns:
+                merged[col] = 0.0
+
+        gender = pd.Series(2, index=merged.index)
+        if demo_df is not None and "RIAGENDR" in demo_df.columns:
             gmap = dict(zip(demo_df["SEQN"], demo_df["RIAGENDR"]))
-            gender = pd.Series([gmap.get(s, 2) for s in merged["SEQN"].values])
+            gender = pd.Series([gmap.get(s, 2) for s in merged["SEQN"].values], index=merged.index)
 
-    kcal = _safe_kcal(merged.get("TOTALKCAL", pd.Series(2000, index=merged.index)))
-    tfat = _safe_val(merged.get("TOTALFAT", merged.get("DR1TTFAT", pd.Series(0, index=merged.index))))
+        kcal = _safe_kcal(merged.get("TOTALKCAL", pd.Series(2000, index=merged.index)))
+        tfat = _safe_val(merged.get("TOTALFAT", merged.get("DR1TTFAT", pd.Series(0, index=merged.index))))
 
-    result = compute_di_gm(
-        data=merged,
-        respondent_id=merged["SEQN"].values,
-        gender=gender.values if hasattr(gender, "values") else gender,
-        avocado=merged["AVOCADO_SERV"].values,
-        broccoli=merged["BROCCOLI_SERV"].values,
-        chickpea=merged["CHICKPEA_SERV"].values,
-        coffee=merged["COFFEE_SERV"].values,
-        cranberry=merged["CRANBERRY_SERV"].values,
-        fermented_dairy=merged["FERMENTED_DAIRY_SERV"].values,
-        fiber=merged.get("FIBER", merged.get("DR1TFIBE", pd.Series(0, index=merged.index))).values,
-        green_tea=merged["GREEN_TEA_SERV"].values,
-        soybean=merged["SOYBEAN_SERV"].values,
-        whole_grain=merged.get("G_WHL", pd.Series(0, index=merged.index)).values,
-        total_fat_pct=(tfat * 9 / kcal) * 100,
-        processed_meat=merged.get("M_FRANK", pd.Series(0, index=merged.index)).values,
-        red_meat=merged.get("M_MEAT", pd.Series(0, index=merged.index)).values,
-        refined_grain=merged.get("G_NWHL", pd.Series(0, index=merged.index)).values,
-    )
+        result = compute_di_gm(
+            data=merged,
+            respondent_id=merged["SEQN"].values,
+            gender=gender.values,
+            avocado=merged["AVOCADO_SERV"].values,
+            broccoli=merged["BROCCOLI_SERV"].values,
+            chickpea=merged["CHICKPEA_SERV"].values,
+            coffee=merged["COFFEE_SERV"].values,
+            cranberry=merged["CRANBERRY_SERV"].values,
+            fermented_dairy=merged["FERMENTED_DAIRY_SERV"].values,
+            fiber=merged.get("FIBER", merged.get("DR1TFIBE", pd.Series(0, index=merged.index))).values,
+            green_tea=merged["GREEN_TEA_SERV"].values,
+            soybean=merged["SOYBEAN_SERV"].values,
+            whole_grain=merged.get("G_WHL", pd.Series(0, index=merged.index)).values,
+            total_fat_pct=(tfat * 9 / kcal) * 100,
+            processed_meat=merged.get("M_FRANK", pd.Series(0, index=merged.index)).values,
+            red_meat=merged.get("M_MEAT", pd.Series(0, index=merged.index)).values,
+            refined_grain=merged.get("G_NWHL", pd.Series(0, index=merged.index)).values,
+        )
+        result["SEQN"] = merged["SEQN"].values
+        result["RESPONDENTID"] = merged["SEQN"].values
+        return result
 
-    result["SEQN"] = merged["SEQN"].values
+    def _average_score_days(day1_scores, day2_scores):
+        if day1_scores is None or day1_scores.empty:
+            return day2_scores
+        if day2_scores is None or day2_scores.empty:
+            return day1_scores
+
+        both = day1_scores.merge(day2_scores, on="SEQN", how="inner", suffixes=("_1", "_2"))
+        result = pd.DataFrame({"SEQN": both["SEQN"]})
+        for col in ["RESPONDENTID", "GENDER"]:
+            c1 = f"{col}_1"
+            if c1 in both.columns:
+                result[col] = both[c1]
+        for col in [c for c in day1_scores.columns if c.startswith("DI_GM_")]:
+            c1 = f"{col}_1"
+            c2 = f"{col}_2"
+            if c1 in both.columns and c2 in both.columns:
+                result[col] = (
+                    pd.to_numeric(both[c1], errors="coerce")
+                    + pd.to_numeric(both[c2], errors="coerce")
+                ) / 2.0
+        return result
+
+    method = str(two_day_method or "intake_average").lower()
+    day1_summary = _process_day(nutrient_ind_path)
+    day2_summary = _process_day(nutrient_ind_path2) if nutrient_ind_path2 is not None else None
+
+    if method in {"score_average", "score", "r"}:
+        day1 = _score_day(day1_summary)
+        day2 = _score_day(day2_summary)
+        result = _average_score_days(day1, day2)
+    elif method in {"intake_average", "intake", "paper"}:
+        merged = _merge_day1_day2(day1_summary, day2_summary)
+        result = _score_day(merged)
+    else:
+        raise ValueError("two_day_method must be 'intake_average' or 'score_average'")
+
+    if result is None:
+        raise ValueError("No data after processing")
     result, _ = _merge_demo(result, demo_path)
     return result

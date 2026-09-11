@@ -1,0 +1,26 @@
+DietaryIndex-Py Notice
+
+Copyright (c) 2026 Zhiwen Yan and contributors.
+
+This repository is licensed under the GNU Affero General Public License,
+version 3 or any later version. See the LICENSE file for the full text.
+
+Academic use notice:
+
+If you use this repository, its software implementation, derived database
+organization, or platform workflow in academic work, please do all of the following:
+
+1. Acknowledge the project in the methods, acknowledgements, software, or data-availability section.
+2. Cite this repository as software.
+3. Cite the associated SCI paper once the final journal information is available.
+
+Recommended citation workflow:
+
+- Current repository citation metadata: CITATION.cff
+- Detailed academic-use guidance: docs/CITATION_GUIDE.md
+
+Privacy and deployment note:
+
+This project is designed to support local-first computation. For real research
+datasets, local deployment is recommended so that participant-level data do not
+leave the user's machine by default.

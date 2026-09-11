@@ -218,10 +218,13 @@ def _score_hei2015_day(fped_path, nutrient_path, demo_path):
         return None
 
     d = str(day)
+    kcal_values = _series(cohort, f"DR{d}TKCAL").to_numpy(dtype=float)
+    sodium_values = _series(cohort, f"DR{d}TSODI").to_numpy(dtype=float)
+    saturated_fat_values = _series(cohort, f"DR{d}TSFAT").to_numpy(dtype=float)
     result = compute_hei2015(
         data=cohort,
         respondent_id=cohort["SEQN"].values,
-        total_kcal=_series(cohort, f"DR{d}TKCAL").values,
+        total_kcal=kcal_values,
         total_fruit=_series(cohort, f"DR{d}T_F_TOTAL").values,
         whole_fruit=(_series(cohort, f"DR{d}T_F_CITMLB") + _series(cohort, f"DR{d}T_F_OTHER")).values,
         total_vegetable=(_series(cohort, f"DR{d}T_V_TOTAL") + _series(cohort, f"DR{d}T_V_LEGUMES")).values,
@@ -247,10 +250,16 @@ def _score_hei2015_day(fped_path, nutrient_path, demo_path):
             _series(cohort, f"DR{d}TSFAT").to_numpy(dtype=float),
         ),
         refined_grain=_series(cohort, f"DR{d}T_G_REFINED").values,
-        sodium=_series(cohort, f"DR{d}TSODI").values,
+        sodium=sodium_values,
         added_sugar=_series(cohort, f"DR{d}T_ADD_SUGARS").values,
-        saturated_fat=_series(cohort, f"DR{d}TSFAT").values,
+        saturated_fat=saturated_fat_values,
     )
+    # The R 2.1 NHANES adapter explicitly zeroes most components for a zero-
+    # energy recall but leaves 0/0 sodium and saturated-fat scores missing.
+    # Preserve that adapter-specific missing-state behavior for exact parity.
+    zero_energy = np.isfinite(kcal_values) & (kcal_values == 0)
+    result.loc[zero_energy & (sodium_values == 0), "HEI2015_SODIUM"] = np.nan
+    result.loc[zero_energy & (saturated_fat_values == 0), "HEI2015_SATFAT"] = np.nan
     result["SEQN"] = cohort["SEQN"].values
     return result[HEI2015_RESULT_COLS]
 

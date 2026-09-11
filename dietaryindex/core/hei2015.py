@@ -113,7 +113,9 @@ def compute_hei2015(
         s_dair[zero_mask] = 0.0
         s_fa[zero_mask] = 0.0
         s_rgrain[zero_mask] = 0.0
+        s_na[zero_mask] = 0.0
         s_asugar[zero_mask] = 0.0
+        s_sfat[zero_mask] = 0.0
         hei_all[zero_mask] = 0.0
 
     return pd.DataFrame({

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DietaryIndex</title>
+    <style>
+      body { margin: 0; background: #fefcf8; color: #33413c; font: 14px Arial, sans-serif; }
+      main { display: grid; min-height: 100vh; place-content: center; text-align: center; }
+      h1 { color: #1a6b56; font-size: 30px; margin: 0 0 12px; }
+      p { margin: 0; color: #5f6b67; }
+      .bar { width: 240px; height: 4px; margin-top: 22px; overflow: hidden; background: #e2ebe7; border-radius: 4px; }
+      .bar::after { content: ""; display: block; width: 45%; height: 100%; background: #2f79bf; animation: load 1.2s ease-in-out infinite alternate; }
+      @keyframes load { from { transform: translateX(-20%); } to { transform: translateX(150%); } }
+    </style>
+  </head>
+  <body><main><h1>DietaryIndex</h1><p>Starting local services… / 正在启动本地服务…</p><div class="bar"></div></main></body>
+</html>

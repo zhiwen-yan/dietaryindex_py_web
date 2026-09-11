@@ -1,0 +1,46 @@
+name: dietaryindex
+
+services:
+  dietaryindex-api:
+    image: dietaryindex-api:0.3.0-20260911
+    restart: unless-stopped
+    command: uvicorn dietaryindex_api.app:app --host 0.0.0.0 --port 8000
+    working_dir: /app
+    environment:
+      DIETARYINDEX_RUNTIME_DIR: /app/runtime_data
+      DIETARYINDEX_API_KEY: ${DIETARYINDEX_API_KEY:?DIETARYINDEX_API_KEY must be set}
+      DIETARYINDEX_REQUIRE_API_KEY: "true"
+      DIETARYINDEX_MAX_UPLOAD_MB: ${DIETARYINDEX_MAX_UPLOAD_MB:-100}
+      DIETARYINDEX_LOG_LEVEL: ${DIETARYINDEX_LOG_LEVEL:-INFO}
+    volumes:
+      - ../../shared/runtime_data:/app/runtime_data
+    ports:
+      - "127.0.0.1:8001:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  dietaryindex-site:
+    image: dietaryindex-site:0.3.0-20260911-en-default
+    restart: unless-stopped
+    environment:
+      DIETARYINDEX_API_INTERNAL_URL: http://dietaryindex-api:8000
+      DIETARYINDEX_API_KEY: ${DIETARYINDEX_API_KEY:?DIETARYINDEX_API_KEY must be set}
+    ports:
+      - "127.0.0.1:3003:3000"
+    depends_on:
+      dietaryindex-api:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

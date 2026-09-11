@@ -4,7 +4,10 @@
 对照数据: R 包 DII.R 文档中的 DHQ3_exp 示例结果
 """
 import sys
-sys.path.insert(0, r"e:\BaiduSyncdisk\yanzhiwen\R shiny 网站\网站设计\dietaryindex_py")
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT / "dietaryindex_py"))
 
 import pandas as pd
 import numpy as np

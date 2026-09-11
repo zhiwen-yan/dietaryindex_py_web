@@ -59,6 +59,8 @@ def compute_medi(
 
     medi_all = medi_oo + medi_frt + medi_veg + medi_leg + medi_nuts + medi_fish + \
         medi_alc + medi_ssb + medi_sw + medi_df + medi_rpm
+    # Dietaryindex R 2.1 defines NOETOH without the olive-oil component as well
+    # as without alcohol. Preserve that definition for cross-language parity.
     medi_noetoh = medi_frt + medi_veg + medi_leg + medi_nuts + medi_fish + \
         medi_ssb + medi_sw + medi_df + medi_rpm
 
@@ -131,6 +133,7 @@ def compute_medi_v2(
 
     medi_v2_all = medi_oo + medi_frt + medi_veg + medi_leg + medi_nuts + \
         medi_fish + medi_alc + medi_ssb + medi_sw + medi_df + medi_rpm
+    # Match the corresponding Dietaryindex R 2.1 output definition.
     medi_v2_noetoh = medi_frt + medi_veg + medi_leg + medi_nuts + medi_fish + \
         medi_ssb + medi_sw + medi_df + medi_rpm
 

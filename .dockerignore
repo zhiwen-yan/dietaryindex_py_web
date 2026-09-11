@@ -17,3 +17,9 @@ scratch
 tests
 analysis
 zero_seqns.txt
+build
+dist
+web_frontend
+runtime_data
+*.log
+*.err.log
