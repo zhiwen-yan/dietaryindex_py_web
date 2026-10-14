@@ -97,8 +97,16 @@ def test_public_score_ranges_match_implementation_metadata():
         assert INDEX_PARAMS[index_key]["max_score"] == expected
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert "| ACS2020 | American Cancer Society 2020 Index | 0-12 |" in readme
-    assert "| PHDI | Planetary Health Diet Index | 0-140 |" in readme
+    assert "(docs/INDEX_SUPPORT_MATRIX.md)" in readme
+    support_matrix = (ROOT / "docs" / "INDEX_SUPPORT_MATRIX.md").read_text(encoding="utf-8")
+    matrix_rows = [
+        [cell.strip() for cell in line.strip("|").split("|")]
+        for line in support_matrix.splitlines()
+        if line.startswith("| `")
+    ]
+    documented_scales = {row[0].strip("`"): row[2] for row in matrix_rows}
+    for index_key in ("ACS2020", "PHDI"):
+        assert documented_scales[index_key] == f"0-{expected_maxima[index_key]}"
 
 
 def test_cli_json_output_is_safe_on_windows_gbk(monkeypatch):
